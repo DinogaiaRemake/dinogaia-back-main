@@ -27,4 +27,6 @@ export class User {
 
     @OneToMany(() => Dino, dino => dino.user)
     dinos: Dino[];
+
+    
 } 

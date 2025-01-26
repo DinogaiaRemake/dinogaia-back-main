@@ -3,12 +3,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Dino } from './dino.entity';
-import { CreateDinoDto } from './dto/create-dino.dto';
+import { CreateDinoDto, DinoSpecies } from './dto/create-dino.dto';
 import { UserService } from '../user/user.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CaveService } from './cave.service';
 import { Cave } from './cave.entity';
 import { getRandomClanForSpecies } from './dto/clan.enum';
+import { TREX_LEVELS, VELOCIRAPTOR_LEVELS, PTERODACTYLE_LEVELS, MEGALODON_LEVELS } from './dto/level-requirements';
 
 @Injectable()
 export class DinoService {
@@ -45,6 +46,24 @@ export class DinoService {
         }
         
         console.log('Mise à jour des dinos terminée !');
+    }
+
+    @Cron(CronExpression.EVERY_MINUTE)
+    async updateDinosAtMinute() {
+        console.log('Mise à jour des dinos à chaque minute...');
+        const allDinos = await this.dinoRepository.find();
+        for (const dino of allDinos) {
+            if (dino.lastAction < new Date(Date.now() - 10 * 60 * 1000)) {
+                dino.isActive = false;
+            }
+            await this.dinoRepository.save(dino);
+        }
+    }
+    
+    async setLastAction(id: number) {
+        const dino = await this.findOne(id);
+        dino.lastAction = new Date();
+        return await this.dinoRepository.save(dino);
     }
 
     // Créer un nouveau dinosaure
@@ -140,6 +159,10 @@ export class DinoService {
         cave.inventory[food].quantity = Number(cave.inventory[food].quantity) - 1;
 
         await this.caveService.update(cave.id, cave);
+        
+        // Mettre à jour la dernière action
+        dino.lastAction = new Date();
+        dino.isActive = true;
 
         return await this.dinoRepository.save(dino);
     }
@@ -148,6 +171,11 @@ export class DinoService {
     async drink(id: number): Promise<Dino> {
         const dino = await this.findOne(id);
         dino.thirst = true;
+        
+        // Mettre à jour la dernière action
+        dino.lastAction = new Date();
+        dino.isActive = true;
+        
         return await this.dinoRepository.save(dino);
     }
 
@@ -155,6 +183,10 @@ export class DinoService {
     async gainXP(id: number, amount: number): Promise<Dino> {
         const dino = await this.findOne(id);
         dino.experience += amount;      
+        
+        // Mettre à jour la dernière action
+        dino.lastAction = new Date();
+        dino.isActive = true;
         
         return await this.dinoRepository.save(dino);
     }
@@ -178,5 +210,31 @@ export class DinoService {
             throw new NotFoundException(`Pas de grotte trouvée pour le dino ${dinoId}`);
         }
         return dino.cave;
+    }
+
+    async getLevelRequirements(species: DinoSpecies, level: number) {
+        let requirements;
+        switch (species) {
+            case DinoSpecies.TREX:
+                requirements = TREX_LEVELS[level];
+                break;
+            case DinoSpecies.VELOCIRAPTOR:
+                requirements = VELOCIRAPTOR_LEVELS[level];
+                break;
+            case DinoSpecies.PTERODACTYL:
+                requirements = PTERODACTYLE_LEVELS[level];
+                break;
+            case DinoSpecies.MEGALODON:
+                requirements = MEGALODON_LEVELS[level];
+                break;
+            default:
+                throw new NotFoundException(`Espèce ${species} non trouvée`);
+        }
+
+        if (!requirements) {
+            throw new NotFoundException(`Niveau ${level} non trouvé pour l'espèce ${species}`);
+        }
+
+        return requirements;
     }
 }

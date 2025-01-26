@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, UseGuards, Request, NotFoundException } from '@nestjs/common';
 import { DinoService } from './dino.service';
 import { Dino } from './dino.entity';
-import { CreateDinoDto } from './dto/create-dino.dto';
+import { CreateDinoDto, DinoSpecies } from './dto/create-dino.dto';
 import { UpdateDinoDto } from './dto/update-dino.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Cave } from './cave.entity';
@@ -107,5 +107,39 @@ export class DinoController {
     @UseGuards(AuthGuard)
     async getDinoCave(@Param('id', ParseIntPipe) id: number): Promise<Cave> {
         return await this.dinoService.getDinoCave(id);
+    }
+
+    @Post(':id/lastAction')
+    async setLastAction(@Param('id', ParseIntPipe) id: number): Promise<Dino> {
+        return await this.dinoService.setLastAction(id);
+    }
+
+    @Get(':species/level/:level')
+    async getLevelRequirements(
+        @Param('species') speciesParam: string,
+        @Param('level', ParseIntPipe) level: number
+    ) {
+        // Convertir le paramètre en valeur d'énumération
+        let species: DinoSpecies;
+        switch (speciesParam.toUpperCase()) {
+            case 'T-REX':
+            case 'TREX':
+                species = DinoSpecies.TREX;
+                break;
+            case 'VELOCIRAPTOR':
+                species = DinoSpecies.VELOCIRAPTOR;
+                break;
+            case 'PTERODACTYL':
+            case 'PTERODACTYLE':
+                species = DinoSpecies.PTERODACTYL;
+                break;
+            case 'MEGALODON':
+                species = DinoSpecies.MEGALODON;
+                break;
+            default:
+                throw new NotFoundException(`Espèce ${speciesParam} non trouvée. Les espèces valides sont : T-Rex, Velociraptor, Pterodactyl, Megalodon`);
+        }
+        
+        return await this.dinoService.getLevelRequirements(species, level);
     }
 }

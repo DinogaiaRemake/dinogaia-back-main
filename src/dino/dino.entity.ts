@@ -67,4 +67,10 @@ export class Dino {
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    lastAction: Date;
+    
+    @Column({ default: true })
+    isActive: boolean;
 } 
