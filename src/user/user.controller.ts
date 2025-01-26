@@ -27,7 +27,7 @@ export class UserController {
 
         const token = this.jwtService.sign({ id: user.id });
         response.cookie('jwt', token, { httpOnly: true, secure: false });
-        return { message: 'Login successful' };
+        return { message: 'Login successful', jwt: token, user: user, status: "OK" };
     }
 
     @Get()

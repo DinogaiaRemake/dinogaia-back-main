@@ -7,13 +7,14 @@ import { User } from '../user/user.entity';
 import { UserModule } from '../user/user.module';
 import { Cave } from './cave.entity';
 import { CaveService } from './cave.service';
+import { CaveController } from './cave.controller';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([Dino, User, Cave]),
         UserModule
     ],
-    controllers: [DinoController],
+    controllers: [DinoController, CaveController],
     providers: [DinoService, CaveService],
     exports: [DinoService, CaveService]
 })

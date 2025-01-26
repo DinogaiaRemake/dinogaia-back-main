@@ -121,14 +121,27 @@ export class DinoService {
     // Nourrir un dinosaure
     async feed(id: number, food: string): Promise<Dino> {
         const dino = await this.findOne(id);
-        if (dino.cave.inventory[food].quantity > 0) {
-            dino.hunger = true;
-            dino.cave.inventory[food].quantity -= 1;
-            dino.weight += dino.cave.inventory[food].weightGain;
-            return await this.dinoRepository.save(dino);
-        } else {
+        
+        // Vérifier si le dino a faim
+        if (!dino.hunger) {
+            throw new NotFoundException(`Le dinosaure n'a pas faim pour le moment`);
+        }
+
+        const cave = dino.cave;
+
+        if (!cave.inventory[food] || cave.inventory[food].quantity <= 0) {
             throw new NotFoundException(`${food} non trouvé dans la grotte du dino ${id}`);
         }
+
+        dino.hunger = false;
+        dino.weight += Number(cave.inventory[food].weightGain);
+        dino.experience += Number(cave.inventory[food].xpGain);
+
+        cave.inventory[food].quantity = Number(cave.inventory[food].quantity) - 1;
+
+        await this.caveService.update(cave.id, cave);
+
+        return await this.dinoRepository.save(dino);
     }
 
     // Faire boire un dinosaure

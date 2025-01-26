@@ -20,8 +20,11 @@ export class UserService {
         return this.userRepository.save(user);
     }
 
-    async findOne(condition: Partial<User>): Promise<User> { //retourne un user sans le password
-        const user = await this.userRepository.findOne({ where: condition });
+    async findOne(condition: Partial<User>): Promise<User> {
+        const user = await this.userRepository.findOne({
+            where: condition,
+            select: ['id', 'email', 'password', 'name', 'role']
+        });
         if (!user) {
             throw new NotFoundException('User not found');
         }

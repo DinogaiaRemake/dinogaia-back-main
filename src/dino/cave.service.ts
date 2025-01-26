@@ -47,9 +47,23 @@ export class CaveService {
         return await this.caveRepository.save(cave);
     }
 
-    async addToInventory(id: number, item: string, quantity: number): Promise<Cave> {
+    async addToInventory(id: number, item: string, quantity: number, weightGain: number = 0, xpGain: number = 0): Promise<Cave> {
         const cave = await this.findOne(id);
-        cave.inventory[item].quantity = (cave.inventory[item].quantity || 0) + quantity;
+        if (!cave.inventory[item]) {
+            cave.inventory[item] = {
+                quantity: 0,
+                weightGain: Number(weightGain),
+                xpGain: Number(xpGain)
+            };
+        }
+        cave.inventory[item].quantity = Number(cave.inventory[item].quantity) + Number(quantity);
+        
+        cave.inventory[item] = {
+            quantity: Number(cave.inventory[item].quantity),
+            weightGain: Number(cave.inventory[item].weightGain),
+            xpGain: Number(cave.inventory[item].xpGain)
+        };
+        
         return await this.caveRepository.save(cave);
     }
 
@@ -60,5 +74,10 @@ export class CaveService {
         }
         cave.inventory[item].quantity -= quantity;
         return await this.caveRepository.save(cave);
+    }
+
+    async getInventory(id: number): Promise<any> {
+        const cave = await this.findOne(id);
+        return cave.inventory;
     }
 } 

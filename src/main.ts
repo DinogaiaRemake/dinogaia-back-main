@@ -8,8 +8,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser());
   app.enableCors({
-    origin: 'http://localhost:3000', // Remplace par l'origine de ton client
-    credentials: true, // Permet l'envoi des cookies
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true,
   });
   await app.listen(3000);
 }
