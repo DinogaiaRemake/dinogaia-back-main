@@ -17,7 +17,11 @@ export class Cave {
 
     @Column('simple-json')
     inventory: {
-        [key: string]: number; // Par exemple: { "poisson": 3, "crabe": 2 }
+        [key: string]: {
+            quantity: number;
+            weightGain: number;
+            xpGain: number;
+        };
     };
 
     @OneToOne(() => Dino)

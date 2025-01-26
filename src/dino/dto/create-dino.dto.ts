@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsEnum, IsNumber, IsString, Min, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsEnum, IsNumber, IsString, Min, IsOptional, IsDate } from 'class-validator';
 
 export enum DinoSpecies {
     TREX = 'T-Rex',
@@ -21,6 +21,10 @@ export class CreateDinoDto {
     @IsString()
     @IsOptional()
     clan?: string;
+
+    @IsNotEmpty()
+    @IsEnum(['male', 'female'])
+    sex: string;
 
     @IsNotEmpty()
     @IsNumber()
@@ -51,4 +55,8 @@ export class CreateDinoDto {
     @IsNumber()
     @Min(1)
     endurance: number = 10;
+
+    @IsNotEmpty()
+    @IsDate()
+    createdAt: Date = new Date();
 } 

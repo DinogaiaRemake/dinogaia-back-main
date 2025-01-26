@@ -49,16 +49,16 @@ export class CaveService {
 
     async addToInventory(id: number, item: string, quantity: number): Promise<Cave> {
         const cave = await this.findOne(id);
-        cave.inventory[item] = (cave.inventory[item] || 0) + quantity;
+        cave.inventory[item].quantity = (cave.inventory[item].quantity || 0) + quantity;
         return await this.caveRepository.save(cave);
     }
 
     async removeFromInventory(id: number, item: string, quantity: number): Promise<Cave> {
         const cave = await this.findOne(id);
-        if (!cave.inventory[item] || cave.inventory[item] < quantity) {
+        if (!cave.inventory[item] || cave.inventory[item].quantity < quantity) {
             throw new NotFoundException(`Pas assez de ${item} dans l'inventaire`);
         }
-        cave.inventory[item] -= quantity;
+        cave.inventory[item].quantity -= quantity;
         return await this.caveRepository.save(cave);
     }
 } 

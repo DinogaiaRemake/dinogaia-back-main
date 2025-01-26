@@ -20,6 +20,9 @@ export class Dino {
     @Column({ nullable: true })
     clan: string;
 
+    @Column({ type: 'enum', enum: ['male', 'female'] })
+    sex: string;
+
     @Column({ default: 1 })
     weight: number;
 
@@ -61,4 +64,7 @@ export class Dino {
 
     @OneToOne(() => Cave, cave => cave.dino)
     cave: Cave;
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    createdAt: Date;
 } 

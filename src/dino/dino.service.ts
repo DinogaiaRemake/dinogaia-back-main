@@ -79,6 +79,18 @@ export class DinoService {
         });
     }
 
+    async levelUp(dinoId: number): Promise<Dino> {
+        const dino = await this.findOne(dinoId);
+        switch (dino.level) {
+            case 1:
+                if (dino.experience == 20 && dino.intelligence >= 10 && dino.agility >= 10 && dino.strength >= 10 && dino.endurance >= 10) {
+                    dino.level = 2;
+                }
+                break;
+        }
+        return await this.dinoRepository.save(dino);
+    }
+
     // Récupérer un dinosaure par son ID
     async findOne(id: number): Promise<Dino> {
         const dino = await this.dinoRepository.findOne({ 
@@ -109,9 +121,10 @@ export class DinoService {
     // Nourrir un dinosaure
     async feed(id: number, food: string): Promise<Dino> {
         const dino = await this.findOne(id);
-        if (dino.cave.inventory[food] > 0) {
+        if (dino.cave.inventory[food].quantity > 0) {
             dino.hunger = true;
-            dino.cave.inventory[food] -= 1;
+            dino.cave.inventory[food].quantity -= 1;
+            dino.weight += dino.cave.inventory[food].weightGain;
             return await this.dinoRepository.save(dino);
         } else {
             throw new NotFoundException(`${food} non trouvé dans la grotte du dino ${id}`);

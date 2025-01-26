@@ -66,22 +66,41 @@ export class DinoController {
 
     @Get('my/dinos')
     @UseGuards(AuthGuard)
-    async findMyDinos(@Request() req): Promise<Dino[]> {
+    async findMyDinos(@Request() req): Promise<any[]> {
         const dinos = await this.dinoService.findByUserId(req.user.id);
-        for (const dino of dinos) {
-            console.log("Name: " + dino.name);
-            console.log(dino.species + " niv." + dino.level);
-            console.log("Clan: " + dino.clan);
-            console.log("Weight: " + dino.weight);
-            console.log("Height: " + dino.height);
-            console.log("Intelligence: " + dino.intelligence);
-            console.log("Agility: " + dino.agility);
-            console.log("Strength: " + dino.strength);
-            console.log("Endurance: " + dino.endurance);
-            console.log("Health: " + dino.health);
-            console.log("XP: " + dino.experience);
-        }
-        return dinos;
+        return dinos.map(dino => {
+            const age = new Date().getTime() - dino.createdAt.getTime();
+            const days = Math.floor(age / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((age % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((age % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return {
+                id: dino.id,
+                name: dino.name,
+                level: dino.level,
+                species: dino.species,
+                clan: dino.clan,
+                sex: dino.sex,
+                createdAt: dino.createdAt,
+                age: {
+                    days,
+                    hours,
+                    minutes
+                },
+                weight: dino.weight,
+                height: dino.height,
+                intelligence: dino.intelligence,
+                agility: dino.agility,
+                strength: dino.strength,
+                endurance: dino.endurance,
+                experience: dino.experience,
+
+                health: dino.health,
+                hunger: dino.hunger,
+                thirst: dino.thirst,
+
+            };
+        });
     }
 
     @Get(':id/cave')
