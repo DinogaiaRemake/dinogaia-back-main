@@ -51,21 +51,19 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'Attaque de baleine', healthDamage: 10, description: 'Se faire attaquer par une baleine bleue' }
         ],
         preys: [
-          /*  { name: 'Baleine Bleue', rarity: 80, xpGain: 15, weightGain: 5 },
-            { name: 'Carpe d\'eau douce', rarity: 50, xpGain: 5, weightGain: 1 },*/
-            { name: 'Crabe doré', rarity: 50, xpGain: 10, weightGain: 1 },
-            {name: 'poisson fébrile', rarity: 30, xpGain: 10, weightGain: 1},
-           /* { name: 'Dauphin joueur', rarity: 90, xpGain: 12, weightGain: 2, isLegendary: true },
-            { name: 'Poisson fébrile', rarity: 2, xpGain: 15, weightGain: 3 },
-            { name: 'Requin citron', rarity: 40, xpGain: 15, weightGain: 3 },
-            { name: 'Requin blanc', rarity: 40, xpGain: 15, weightGain: 3 },
-            { name: 'Mouette Offensive', rarity: 40, xpGain: 15, weightGain: 3 },
-            { name: 'Hippocampe', rarity: 90, xpGain: 15, weightGain: 3 },
-            { name: 'Epaulard Classique', rarity: 20, xpGain: 15, weightGain: 3 },
-            { name: 'Epaulard joueur ★', rarity: 40, xpGain: 15, weightGain: 3 },
-            { name: 'Epaulard joueur doré ★', rarity: 20, xpGain: 15, weightGain: 3 },
-            { name: 'Dauphin joueur ★', rarity: 70, xpGain: 15, weightGain: 3 },
-            { name: 'Dauphin rieur', rarity: 40, xpGain: 15, weightGain: 3 }*/
+            { name: 'baleine_bleue', rarity: 5, xpGain: 15, weightGain: 5 },
+            { name: 'carpe_eau_douce', rarity: 5, xpGain: 5, weightGain: 1 },
+            { name: 'crabe_dore', rarity: 10, xpGain: 10, weightGain: 1 },
+            { name: 'poisson_febrile', rarity: 30, xpGain: 10, weightGain: 1 },
+            { name: 'requin_citron', rarity: 8, xpGain: 15, weightGain: 3 },
+            { name: 'requin_blanc', rarity: 8, xpGain: 15, weightGain: 3 },
+            { name: 'mouette_offensive', rarity: 8, xpGain: 15, weightGain: 3 },
+            { name: 'hippocampe', rarity: 3, xpGain: 15, weightGain: 3 },
+            { name: 'epaulard_classique', rarity: 8, xpGain: 15, weightGain: 3 },
+            { name: 'epaulard_joueur', rarity: 5, xpGain: 15, weightGain: 3 },
+            { name: 'epaulard_joueur_dore', rarity: 2, xpGain: 15, weightGain: 3 },
+            { name: 'dauphin_joueur', rarity: 5, xpGain: 12, weightGain: 2 },
+            { name: 'dauphin_rieur', rarity: 3, xpGain: 15, weightGain: 3 }
         ]
     },
     [HuntingZone.JUNGLE]: {
@@ -81,14 +79,14 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'Aspiration de mana', healthDamage: 0, manaDamage: 23, description: 'Se faire aspirer de la mage par un lézard doré' }
         ],
         preys: [
-            { name: 'Lézard doré', rarity: 40, xpGain: 3, weightGain:2},
-            { name: 'Hibou hurleur', rarity: 20, xpGain: 1, weightGain:1},
-            { name: 'Renard des lisères', rarity: 30, xpGain: 3, weightGain:3},
-            { name: 'Cobra royal', rarity: 40, xpGain: 5, weightGain:2},
-            { name: 'Panthère noire', rarity: 30, xpGain: 7, weightGain:4},
-            { name: 'Lézard des cavernes', rarity: 40, xpGain: 8, weightGain: 1 },
-            { name: 'Panda', rarity: 15, xpGain: 20, weightGain: 3 },
-            { name: 'Tigre Blanc', rarity: 90, xpGain: 25, weightGain: 4 }
+            { name: 'lezard_dore', rarity: 20, xpGain: 3, weightGain: 2 },
+            { name: 'hibou_hurleur', rarity: 15, xpGain: 1, weightGain: 1 },
+            { name: 'renard_liseres', rarity: 15, xpGain: 3, weightGain: 3 },
+            { name: 'cobra_royal', rarity: 15, xpGain: 5, weightGain: 2 },
+            { name: 'panthere_noire', rarity: 12, xpGain: 7, weightGain: 4 },
+            { name: 'lezard_cavernes', rarity: 15, xpGain: 8, weightGain: 1 },
+            { name: 'panda', rarity: 5, xpGain: 20, weightGain: 3 },
+            { name: 'tigre_blanc', rarity: 3, xpGain: 25, weightGain: 4 }
         ]
     },
     [HuntingZone.CANYON]: {
@@ -102,9 +100,9 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'Attaque de chaman', healthDamage: 20, manaDamage: 20, description: 'Se faire attaquer par un chaman' }
         ],
         preys: [
-            { name: 'Lézard doré', rarity: 40, xpGain: 3, weightGain:2},
-            { name: 'Aigle mineur', rarity: 40, xpGain: 8, weightGain: 1 },
-            { name: 'Python chasseur', rarity: 30, xpGain: 10, weightGain: 2 }
+            { name: 'lezard_dore', rarity: 40, xpGain: 3, weightGain: 2 },
+            { name: 'aigle_mineur', rarity: 35, xpGain: 8, weightGain: 1 },
+            { name: 'python_chasseur', rarity: 25, xpGain: 10, weightGain: 2 }
         ]
     },
     [HuntingZone.SKY_ISLANDS]: {
@@ -119,9 +117,9 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'Attaque de baleine', healthDamage: 10, description: 'Tu t\'es fait attaquer par une baleine bleu' }
         ],
         preys: [
-            { name: 'Hibou hurleur', rarity: 35, xpGain: 10, weightGain: 1 },
-            { name: 'Poulpe Géant', rarity: 15, xpGain: 20, weightGain: 3 },
-            { name: 'Epaulard Joueur', rarity: 20, xpGain: 15, weightGain: 2, isLegendary: true }
+            { name: 'hibou_hurleur', rarity: 45, xpGain: 10, weightGain: 1 },
+            { name: 'poulpe_geant', rarity: 35, xpGain: 20, weightGain: 3 },
+            { name: 'epaulard_joueur', rarity: 20, xpGain: 15, weightGain: 2, isLegendary: true }
         ]
     },
     [HuntingZone.DRAGON_CAVE]: {
@@ -144,9 +142,9 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'Attaque de lion', healthDamage: 20, description: 'Se faire attaquer par un lion' }
         ],
         preys: [
-            { name: 'Zèbre', rarity: 50, xpGain: 8, weightGain: 2 },
-            { name: 'Girafe', rarity: 30, xpGain: 15, weightGain: 3 },
-            { name: 'Lion apprenti', rarity: 20, xpGain: 20, weightGain: 3 }
+            { name: 'zebre', rarity: 45, xpGain: 8, weightGain: 2 },
+            { name: 'girafe', rarity: 35, xpGain: 15, weightGain: 3 },
+            { name: 'lion_apprenti', rarity: 20, xpGain: 20, weightGain: 3 }
         ]
     },
     [HuntingZone.MOUNTAIN]: {
@@ -160,9 +158,9 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'Création d\'avalanche', healthDamage: 27, description: 'Danger : Créer une avalanche' }
         ],
         preys: [
-            { name: 'Lynx des montagnes', rarity: 30, xpGain: 12, weightGain: 2 },
-            { name: 'Loup pleureur', rarity: 35, xpGain: 10, weightGain: 2 },
-            { name: 'Ours polaire', rarity: 15, xpGain: 20, weightGain: 4 }
+            { name: 'lynx_montagnes', rarity: 40, xpGain: 12, weightGain: 2 },
+            { name: 'loup_pleureur', rarity: 35, xpGain: 10, weightGain: 2 },
+            { name: 'ours_polaire', rarity: 25, xpGain: 20, weightGain: 4 }
         ]
     },
     [HuntingZone.GRAND_CANYON]: {
@@ -176,9 +174,9 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'Attaque de chaman', healthDamage: 20, manaDamage: 20, description: 'se faire attaquer par un chaman' }
         ],
         preys: [
-            { name: 'Aigle mineur', rarity: 40, xpGain: 10, weightGain: 1 },
-            { name: 'Grizzly des canyons', rarity: 20, xpGain: 18, weightGain: 3 },
-            { name: 'Bison furax', rarity: 25, xpGain: 15, weightGain: 3 }
+            { name: 'aigle_mineur', rarity: 40, xpGain: 10, weightGain: 1 },
+            { name: 'grizzly_canyons', rarity: 35, xpGain: 18, weightGain: 3 },
+            { name: 'bison_furax', rarity: 25, xpGain: 15, weightGain: 3 }
         ]
     },
     [HuntingZone.MIDWORLD]: {
@@ -193,9 +191,9 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'Perturbations UFO', healthDamage: 20, description: 'Tu as subi quelques perturbations dans l\'UFO' }
         ],
         preys: [
-            { name: 'Cyborgs mg-V1', rarity: 35, xpGain: 15, weightGain: 2 },
-            { name: 'Alien de MidWorld', rarity: 25, xpGain: 20, weightGain: 2 },
-            { name: 'Demon Urbain', rarity: 15, xpGain: 25, weightGain: 3 }
+            { name: 'cyborgs_mg_v1', rarity: 45, xpGain: 15, weightGain: 2 },
+            { name: 'alien_midworld', rarity: 35, xpGain: 20, weightGain: 2 },
+            { name: 'demon_urbain', rarity: 20, xpGain: 25, weightGain: 3 }
         ]
     }
 }; 

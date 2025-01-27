@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DinoController } from './dino.controller';
 import { DinoService } from './dino.service';
@@ -16,7 +16,8 @@ import { JobController } from './job.controller';
 @Module({
     imports: [
         TypeOrmModule.forFeature([Dino, User, Cave]),
-        UserModule
+        UserModule,
+        forwardRef(() => DinoModule)
     ],
     controllers: [DinoController, CaveController, HuntingController, JobController],
     providers: [DinoService, CaveService, HuntingService, JobService],

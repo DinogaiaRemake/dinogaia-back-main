@@ -1,5 +1,5 @@
 // TODO: Implement DinoService
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Dino } from './dino.entity';
@@ -17,6 +17,7 @@ export class DinoService {
         @InjectRepository(Dino)
         private dinoRepository: Repository<Dino>,
         private userService: UserService,
+        @Inject(forwardRef(() => CaveService))
         private caveService: CaveService,
     ) {}
 

@@ -1,26 +1,19 @@
-import { Controller, Post, Body, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Param, UseGuards, ParseIntPipe, Get } from '@nestjs/common';
 import { CaveService } from './cave.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Type } from 'class-transformer';
-import { IsNumber, IsString, Min , IsOptional} from 'class-validator';
+import { IsNumber, IsString, Min } from 'class-validator';
+import { ITEMS_CONFIG } from './dto/item.enum';
+import { UseItemDto } from './dto/use-item.dto';
 
 class AddInventoryItemDto {
     @IsString()
-    item: string;
+    itemKey: string;
 
     @IsNumber()
     @Type(() => Number)
     @Min(1)
     quantity: number;
-
-    @IsNumber()
-    @Type(() => Number)
-    weightGain?: number;
-
-    @IsNumber()
-    @IsOptional()
-    @Type(() => Number)
-    xpGain?: number;
 }
 
 @Controller('caves')
@@ -35,10 +28,26 @@ export class CaveController {
     ) {
         return await this.caveService.addToInventory(
             id,
-            itemData.item,
-            itemData.quantity,
-            itemData.weightGain || 0,
-            itemData.xpGain || 0
+            itemData.itemKey,
+            itemData.quantity
         );
+    }
+
+    @Post(':id/use-item')
+    @UseGuards(AuthGuard)
+    async useItem(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() itemData: UseItemDto
+    ) {
+        return await this.caveService.useItem(
+            id,
+            itemData.itemKey,
+            itemData.quantity
+        );
+    }
+
+    @Get('items')
+    async getAvailableItems() {
+        return ITEMS_CONFIG;
     }
 } 
