@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToOne } from 'typ
 import { User } from '../user/user.entity';
 import { DinoSpecies } from './dto/create-dino.dto';
 import { Cave } from './cave.entity';
+import { Job } from './dto/job.enum';
 
 @Entity()
 export class Dino {
@@ -16,6 +17,16 @@ export class Dino {
         enum: DinoSpecies
     })
     species: DinoSpecies;
+
+    @Column({
+        type: 'enum',
+        enum: Job,
+        default: Job.CHOMEUR
+    })
+    job: Job;
+
+    @Column({ default: 0 })
+    emeralds: number;
 
     @Column({ nullable: true })
     clan: string;
@@ -73,4 +84,10 @@ export class Dino {
     
     @Column({ default: true })
     isActive: boolean;
+
+    @Column('simple-array', { nullable: true })
+    completedQuests: string[];
+
+    @Column({ default: true })
+    canHunt: boolean;
 } 

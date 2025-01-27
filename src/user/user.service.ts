@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindOptionsWhere } from 'typeorm';
 import { User } from './user.entity';
 import * as bcrypt from 'bcryptjs';
 
@@ -20,7 +20,7 @@ export class UserService {
         return this.userRepository.save(user);
     }
 
-    async findOne(condition: Partial<User>): Promise<User> {
+    async findOne(condition: FindOptionsWhere<User>): Promise<User> {
         const user = await this.userRepository.findOne({
             where: condition,
             select: ['id', 'email', 'password', 'name', 'role']

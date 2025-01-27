@@ -98,6 +98,8 @@ export class DinoController {
                 health: dino.health,
                 hunger: dino.hunger,
                 thirst: dino.thirst,
+                emeralds: dino.emeralds,
+                job: dino.job,
 
             };
         });

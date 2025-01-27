@@ -9,7 +9,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { CaveService } from './cave.service';
 import { Cave } from './cave.entity';
 import { getRandomClanForSpecies } from './dto/clan.enum';
-import { TREX_LEVELS, VELOCIRAPTOR_LEVELS, PTERODACTYLE_LEVELS, MEGALODON_LEVELS } from './dto/level-requirements';
+import { TREX_LEVELS, VELOCIRAPTOR_LEVELS, PTERODACTYLE_LEVELS, MEGALODON_LEVELS, LevelRequirements } from './dto/level-requirements';
 
 @Injectable()
 export class DinoService {
@@ -23,15 +23,18 @@ export class DinoService {
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
     async updateDinosAtMidnight() {
         console.log('Mise à jour des dinos à minuit...');
-        const allDinos = await this.dinoRepository.find();
+        const allDinos = await this.dinoRepository.find({
+            relations: ['cave']
+        });
         
         for (const dino of allDinos) {
-            
+            console.log("dino + cave de : " + dino.name + " " +dino.cave);
             if (dino.hunger && dino.thirst) {
                 dino.height += 1;
+                dino.health += 10;
             }
 
-            if (dino.cave.isClean) {
+            if (!dino.cave?.isClean) {
                 const random = Math.random();
                 if (random < 0.1) {
                     // TODO: Dino is sick
@@ -40,12 +43,34 @@ export class DinoService {
 
             dino.hunger = false;
             dino.thirst = false;
-            dino.cave.isClean = false;
+            dino.canHunt = true;
+            if (dino.cave) {
+                dino.cave.isClean = false;
+            }
             
             await this.dinoRepository.save(dino);
         }
         
         console.log('Mise à jour des dinos terminée !');
+    }
+
+    //test cron 10s
+    @Cron(CronExpression.EVERY_10_SECONDS)
+    async testCron() {
+        //console.log('Test cron 10s...');
+        //canHunt = true
+        /*const allDinos = await this.dinoRepository.find({
+            relations: ['cave']
+        });
+        
+        for (const dino of allDinos) {
+             dino.hunger = true;
+            dino.canHunt = true;
+            await this.dinoRepository.save(dino);
+        }
+
+       
+       this.feed(6, "crabe doré");*/
     }
 
     @Cron(CronExpression.EVERY_MINUTE)
@@ -154,8 +179,8 @@ export class DinoService {
 
         dino.hunger = false;
         dino.weight += Number(cave.inventory[food].weightGain);
-        dino.experience += Number(cave.inventory[food].xpGain);
-
+        //Gain xp but limit to the max of the level (should be replace as max xp is fight dependent not feed)
+        dino.experience = Math.min((await this.getLevelRequirements(dino.species, dino.level + 1)).maxExperience, dino.experience+Number(cave.inventory[food].xpGain));
         cave.inventory[food].quantity = Number(cave.inventory[food].quantity) - 1;
 
         await this.caveService.update(cave.id, cave);
@@ -212,7 +237,7 @@ export class DinoService {
         return dino.cave;
     }
 
-    async getLevelRequirements(species: DinoSpecies, level: number) {
+    async getLevelRequirements(species: DinoSpecies, level: number): Promise<LevelRequirements> {
         let requirements;
         switch (species) {
             case DinoSpecies.TREX:
