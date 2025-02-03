@@ -74,7 +74,7 @@ jobs:
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            cd /root/dinogaia/back
+            cd /root/dinogaia/back/dist
             pm2 start npm --name dinogaia-back -- run start:dev || pm2 restart dinogaia-back
 
       - name: Log timestamp
@@ -84,5 +84,5 @@ jobs:
           username: root
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            cd /root/dinogaia/back
+            cd /root/dinogaia/back/
             touch timestamp
