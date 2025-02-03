@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { User } from './user.entity';
+import { DinoModule } from '../dino/dino.module';
 
 @Module({
     imports: [
@@ -12,6 +13,7 @@ import { User } from './user.entity';
             secret: process.env.JWT_SECRET || 'votre_secret_jwt',
             signOptions: { expiresIn: '1h' },
         }),
+        forwardRef(() => DinoModule)
     ],
     controllers: [UserController],
     providers: [UserService],

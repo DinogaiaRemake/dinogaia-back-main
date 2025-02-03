@@ -39,22 +39,22 @@ export class CreateDinoDto {
     @IsNotEmpty()
     @IsNumber()
     @Min(1)
-    intelligence: number = 10;
+    intelligence: number = 1;
 
     @IsNotEmpty()
     @IsNumber()
     @Min(1)
-    agility: number = 10;
+    agility: number = 1;
 
     @IsNotEmpty()
     @IsNumber()
     @Min(1)
-    strength: number = 10;
+    strength: number = 1;
 
     @IsNotEmpty()
     @IsNumber()
     @Min(1)
-    endurance: number = 10;
+    endurance: number = 1;
 
     @IsNotEmpty()
     @IsDate()

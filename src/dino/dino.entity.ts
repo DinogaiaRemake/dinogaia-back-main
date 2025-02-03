@@ -40,16 +40,16 @@ export class Dino {
     @Column({ default: 1 })
     height: number;
 
-    @Column({ default: 10 })
+    @Column({ default: 1 })
     intelligence: number;
 
-    @Column({ default: 10 })
+    @Column({ default: 1 })
     agility: number;
 
-    @Column({ default: 10 })
+    @Column({ default: 1 })
     strength: number;
 
-    @Column({ default: 10 })
+    @Column({ default: 1 })
     endurance: number;
 
     @Column({ default: 100 })

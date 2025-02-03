@@ -12,15 +12,41 @@ import { HuntingService } from './hunting.service';
 import { HuntingController } from './hunting.controller';
 import { JobService } from './job.service';
 import { JobController } from './job.controller';
+import { ShopService } from './shop.service';
+import { ShopController } from './shop.controller';
+import { Duel } from './duel.entity';
+import { DuelService } from './duel.service';
+import { DuelController } from './duel.controller';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Dino, User, Cave]),
-        UserModule,
+        TypeOrmModule.forFeature([Dino, User, Cave, Duel]),
+        forwardRef(() => UserModule),
         forwardRef(() => DinoModule)
     ],
-    controllers: [DinoController, CaveController, HuntingController, JobController],
-    providers: [DinoService, CaveService, HuntingService, JobService],
-    exports: [DinoService, CaveService, HuntingService, JobService]
+    controllers: [
+        DinoController,
+        CaveController,
+        HuntingController,
+        JobController,
+        ShopController,
+        DuelController
+    ],
+    providers: [
+        DinoService,
+        CaveService,
+        HuntingService,
+        JobService,
+        ShopService,
+        DuelService
+    ],
+    exports: [
+        DinoService,
+        CaveService,
+        HuntingService,
+        JobService,
+        ShopService,
+        DuelService
+    ]
 })
 export class DinoModule {}

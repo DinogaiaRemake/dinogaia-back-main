@@ -125,8 +125,8 @@ export class CaveService {
             throw new BadRequestException(`Pas assez de ${itemConfig.name} dans l'inventaire`);
         }
 
-        if (itemConfig.type !== ItemType.SKILL_BOOK) {
-            throw new BadRequestException(`Cet item n'est pas un livre de compétences`);
+        if (itemConfig.type !== ItemType.SKILL) {
+            throw new BadRequestException(`Cet item n'est pas un boost de compétences`);
         }
 
         if (!itemConfig.skillBonus) {

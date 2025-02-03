@@ -79,7 +79,7 @@ export class DinoService {
         console.log('Mise à jour des dinos à chaque minute...');
         const allDinos = await this.dinoRepository.find();
         for (const dino of allDinos) {
-            if (dino.lastAction < new Date(Date.now() - 10 * 60 * 1000)) {
+            if (dino.lastAction < new Date(Date.now() - 2 * 60 * 1000)) {
                 dino.isActive = false;
             }
             await this.dinoRepository.save(dino);
@@ -89,6 +89,8 @@ export class DinoService {
     async setLastAction(id: number) {
         const dino = await this.findOne(id);
         dino.lastAction = new Date();
+        dino.isActive = true;
+        console.log("dino " + dino.name + " is active");
         return await this.dinoRepository.save(dino);
     }
 
@@ -126,12 +128,22 @@ export class DinoService {
 
     async levelUp(dinoId: number): Promise<Dino> {
         const dino = await this.findOne(dinoId);
-        switch (dino.level) {
-            case 1:
-                if (dino.experience == 20 && dino.intelligence >= 10 && dino.agility >= 10 && dino.strength >= 10 && dino.endurance >= 10) {
-                    dino.level = 2;
-                }
-                break;
+        const requirements = await this.getLevelRequirements(dino.species, dino.level + 1);
+        
+        if (dino.experience == requirements.maxExperience && 
+            dino.intelligence == requirements.maxIntelligence && 
+            dino.agility == requirements.maxAgility && 
+            dino.strength == requirements.maxForce && 
+            dino.endurance == requirements.maxEndurance) {
+            
+            console.log("requirements are met");
+            
+            // Vérifier les quêtes seulement si elles sont requises
+            if (!requirements.quest || 
+                (dino.completedQuests && requirements.quest.every(q => dino.completedQuests.includes(q)))) {
+                console.log("quests are completed or not required");
+                dino.level += 1;
+            }
         }
         return await this.dinoRepository.save(dino);
     }
@@ -263,4 +275,13 @@ export class DinoService {
 
         return requirements;
     }
+
+    //get all dinos active
+    async getAllActiveDinos(): Promise<Dino[]> {
+        return await this.dinoRepository.find({
+            where: { isActive: true }
+        });
+    }
+    
+    
 }

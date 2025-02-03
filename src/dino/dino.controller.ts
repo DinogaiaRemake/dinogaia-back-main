@@ -5,7 +5,7 @@ import { CreateDinoDto, DinoSpecies } from './dto/create-dino.dto';
 import { UpdateDinoDto } from './dto/update-dino.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Cave } from './cave.entity';
-
+import { ForbiddenException } from '@nestjs/common';
 @Controller('dinos')
 export class DinoController {
     constructor(private readonly dinoService: DinoService) {}
@@ -21,6 +21,12 @@ export class DinoController {
     @UseGuards(AuthGuard)
     async findAll(): Promise<Dino[]> {
         return await this.dinoService.findAll();
+    }
+
+    @Get('active')
+    @UseGuards(AuthGuard)
+    async getAllActiveDinos(): Promise<Dino[]> {
+        return await this.dinoService.getAllActiveDinos();
     }
 
     @Get(':id')
@@ -112,6 +118,7 @@ export class DinoController {
     }
 
     @Post(':id/lastAction')
+    @UseGuards(AuthGuard)
     async setLastAction(@Param('id', ParseIntPipe) id: number): Promise<Dino> {
         return await this.dinoService.setLastAction(id);
     }
@@ -144,4 +151,15 @@ export class DinoController {
         
         return await this.dinoService.getLevelRequirements(species, level);
     }
+
+    @Post(':id/levelup')
+    @UseGuards(AuthGuard)
+    async levelUp(@Param('id', ParseIntPipe) id: number, @Request() req): Promise<Dino> {
+        const dino = await this.dinoService.findOne(id);
+        if (dino.userId !== req.user.id) {
+            throw new ForbiddenException('Vous n\'êtes pas le propriétaire de ce dinosaure');
+        }
+        return await this.dinoService.levelUp(id);
+    }
+
 }

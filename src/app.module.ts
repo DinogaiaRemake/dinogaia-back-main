@@ -15,7 +15,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: 'dinogaia',
+      password: 'Phptest123!',
       database: 'dinogaia_db',
       autoLoadEntities: true,
       synchronize: true,

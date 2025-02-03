@@ -3,8 +3,9 @@ export enum ItemType {
     SECURITY = 'security',
     HYGIENE = 'hygiene',
     FOOD = 'food',
-    SKILL_BOOK = 'skill_book',
-    WEAPON = 'weapon'
+    SKILL = 'skill',
+    WEAPON = 'weapon',
+    FIGHT_BOOST = 'fight_boost'
 }
 
 export interface ItemConfig {
@@ -26,6 +27,10 @@ export interface ItemConfig {
         minPreys: number;
         maxPreys: number;
     };
+    fightBoost?: {
+        health: number;
+        mana: number;
+    };
 }
 
 export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
@@ -33,7 +38,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'poisson_febrile': {
         name: 'Poisson fébrile',
         type: ItemType.PREY,
-        price: 30,
+        price: 3,
         description: 'Un poisson commun de la plage',
         weightGain: 1,
         xpGain: 0
@@ -41,7 +46,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'crabe_dore': {
         name: 'Crabe doré',
         type: ItemType.PREY,
-        price: 50,
+        price: 10,
         description: 'Un crabe à la carapace dorée',
         weightGain: 1,
         xpGain: 0
@@ -57,9 +62,9 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'dauphin_joueur': {
         name: 'Dauphin joueur',
         type: ItemType.PREY,
-        price: 120,
+        price: 125,
         description: 'Un dauphin très joueur',
-        weightGain: 2,
+        weightGain: 19,
         xpGain: 0
     },
     'carpe_eau_douce': {
@@ -81,7 +86,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'requin_blanc': {
         name: 'Requin blanc',
         type: ItemType.PREY,
-        price: 100,
+        price: 125,
         description: 'Un requin blanc',
         weightGain: 3,
         xpGain: 0
@@ -97,7 +102,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'hippocampe': {
         name: 'Hippocampe',
         type: ItemType.PREY,
-        price: 200,
+        price: 20,
         description: 'Un hippocampe rare',
         weightGain: 3,
         xpGain: 0
@@ -139,7 +144,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'lezard_dore': {
         name: 'Lézard doré',
         type: ItemType.PREY,
-        price: 60,
+        price: 30,
         description: 'Un lézard à la peau dorée',
         weightGain: 2,
         xpGain: 0
@@ -147,7 +152,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'hibou_hurleur': {
         name: 'Hibou hurleur',
         type: ItemType.PREY,
-        price: 40,
+        price: 15,
         description: 'Un hibou qui hurle',
         weightGain: 1,
         xpGain: 0
@@ -155,7 +160,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'renard_liseres': {
         name: 'Renard des lisères',
         type: ItemType.PREY,
-        price: 70,
+        price: 30,
         description: 'Un renard des lisères',
         weightGain: 3,
         xpGain: 0
@@ -163,7 +168,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'cobra_royal': {
         name: 'Cobra royal',
         type: ItemType.PREY,
-        price: 100,
+        price: 80,
         description: 'Un cobra royal',
         weightGain: 2,
         xpGain: 0
@@ -179,7 +184,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'lezard_cavernes': {
         name: 'Lézard des cavernes',
         type: ItemType.PREY,
-        price: 80,
+        price: 7,
         description: 'Un lézard des cavernes',
         weightGain: 1,
         xpGain: 0
@@ -205,7 +210,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'aigle_mineur': {
         name: 'Aigle mineur',
         type: ItemType.PREY,
-        price: 80,
+        price: 62,
         description: 'Un aigle mineur',
         weightGain: 1,
         xpGain: 0
@@ -233,7 +238,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'zebre': {
         name: 'Zèbre',
         type: ItemType.PREY,
-        price: 100,
+        price: 43,
         description: 'Un zèbre',
         weightGain: 2,
         xpGain: 0
@@ -241,7 +246,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'girafe': {
         name: 'Girafe',
         type: ItemType.PREY,
-        price: 200,
+        price: 49,
         description: 'Une girafe',
         weightGain: 3,
         xpGain: 0
@@ -259,7 +264,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     'lynx_montagnes': {
         name: 'Lynx des montagnes',
         type: ItemType.PREY,
-        price: 150,
+        price: 55,
         description: 'Un lynx des montagnes',
         weightGain: 2,
         xpGain: 0
@@ -367,37 +372,37 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     },
 
     // Livres de compétences
-    'livre_intelligence': {
-        name: 'Livre de sagesse',
-        type: ItemType.SKILL_BOOK,
+    'heure_ecole': {
+        name: 'Heure d\'école',
+        type: ItemType.SKILL,
         price: 5,
         description: 'Augmente l\'intelligence',
         skillBonus: {
             intelligence: 1
         }
     },
-    'livre_agilite': {
-        name: 'Manuel de mouvements',
-        type: ItemType.SKILL_BOOK,
+    'trampoline': {
+        name: 'Trampoline',
+        type: ItemType.SKILL,
         price: 5,
         description: 'Augmente l\'agilité',
         skillBonus: {
             agility: 1
         }
     },
-    'livre_force': {
-        name: 'Manuel de force',
-        type: ItemType.SKILL_BOOK,
+    'haltere': {
+        name: 'Haltère',
+        type: ItemType.SKILL,
         price: 5,
         description: 'Augmente la force',
         skillBonus: {
             strength: 1
         }
     },
-    'livre_endurance': {
-        name: 'Manuel d\'endurance',
-        type: ItemType.SKILL_BOOK,
-        price: 6,
+    'tapis_de_course': {
+        name: 'Tapis de course',
+        type: ItemType.SKILL,
+        price: 5,
         description: 'Augmente l\'endurance',
         skillBonus: {
             endurance: 1
@@ -415,13 +420,13 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
             maxPreys: 4
         }
     },
-    'dents_titane': {
-        name: 'Dents en titane',
+    'fusil_de_chasse': {
+        name: 'Fusil de chasse',
         type: ItemType.WEAPON,
         price: 800,
         description: 'Augmente significativement le nombre de proies capturées',
         weaponStats: {
-            minPreys: 3,
+            minPreys: 4,
             maxPreys: 6
         }
     }
