@@ -1,3 +1,10 @@
+name: Build and Deploy Dinogaia
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -68,6 +75,7 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             npm install -g pm2
+            pm2 --version
 
       - name: Restart PM2 service on server
         uses: appleboy/ssh-action@master
