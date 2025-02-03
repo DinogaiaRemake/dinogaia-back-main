@@ -20,18 +20,18 @@ jobs:
 
       - name: Copy files to VPS
         run: |
-          rsync -avz --delete ./ user@your-vps-address:/path/to/express-app/
+          rsync -avz --delete ./ root@y217.154.2.82:/root/dinogaia/back
 
       - name: Install dependencies on VPS
         run: |
           ssh root@y217.154.2.82"
-          cd /path/to/express-app && 
+          cd /root/dinogaia/back && 
           npm install
           "
 
       - name: Restart PM2 service for Express
         run: |
           ssh user@your-vps-address "
-          cd /path/to/express-app &&
-          pm2 start server.js --name express-app || pm2 restart express-app
+          cd /root/dinogaia/back &&
+          pm2 start npm --name nest-app -- run start:dev || pm2 restart nest-app
           "
