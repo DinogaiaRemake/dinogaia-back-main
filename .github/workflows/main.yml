@@ -20,7 +20,7 @@ jobs:
 
       - name: Copy files to VPS
         run: |
-          rsync -avz --delete ./ root@y217.154.2.82:/root/dinogaia/back
+          rsync -avz --delete ./ root@217.154.2.82:/root/dinogaia/back
 
       - name: Install dependencies on VPS
         run: |
