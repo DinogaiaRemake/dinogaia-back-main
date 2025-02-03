@@ -1,0 +1,88 @@
+name: Build and Deploy Dinogaia
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: '22.6.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install global Nest CLI
+        run: npm install -g @nestjs/cli
+
+      - name: Run tests
+        run: npm run test
+        continue-on-error: true
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy files to VPS
+        uses: Dylan700/sftp-upload-action@latest
+        with:
+          server: ${{ vars.SERVER_HOST }}
+          username: root
+          password: ${{ secrets.SERVER_PASSWORD }}
+          uploads: |
+            ./ => /root/dinogaia/back/
+            ./dist/ => /root/dinogaia/back/dist/
+          ignore: |
+            .git
+            .github
+            node_modules
+            src
+            test
+            .env
+            .env.*
+            .gitignore
+            .prettierrc
+            .eslintrc.js
+            README.md
+            Gulpfile.js
+            nest-cli.json
+            package-lock.json
+
+      - name: Install dependencies on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          username: root
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            cd /root/dinogaia/back
+            npm install
+
+      - name: Restart PM2 service on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          username: root
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            cd /root/dinogaia/back
+            pm2 start npm --name dinogaia-back -- run start:dev || pm2 restart dinogaia-back
+
+      - name: Log timestamp
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          username: root
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            cd /root/dinogaia/back
+            touch timestamp
