@@ -14,6 +14,6 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
-  await app.listen(3000);
+  await app.listen(3000, '0.0.0.0');  // '0.0.0.0' permet de répondre sur toutes les interfaces réseau
 }
 bootstrap();
