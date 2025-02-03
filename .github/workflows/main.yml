@@ -67,17 +67,6 @@ jobs:
             cd /root/dinogaia/back
             npm install
 
-      - name: Run database migrations on server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ vars.SERVER_HOST }}
-          username: root
-          password: ${{ secrets.SERVER_PASSWORD }}
-          script: |
-            cd /root/dinogaia/back
-            npm run migration:show
-            npm run migration:run
-
       - name: Restart PM2 service on server
         uses: appleboy/ssh-action@master
         with:
