@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies on VPS
         run: |
-          ssh root@y217.154.2.82"
+          ssh root@217.154.2.82"
           cd /root/dinogaia/back && 
           npm install
           "
