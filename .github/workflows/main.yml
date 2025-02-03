@@ -67,6 +67,9 @@ jobs:
             cd /root/dinogaia/back
             npm install
 
+      - name: Install pm2
+        run: npm install -g pm2
+
       - name: Restart PM2 service on server
         uses: appleboy/ssh-action@master
         with:
