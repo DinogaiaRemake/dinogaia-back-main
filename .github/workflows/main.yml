@@ -1,0 +1,37 @@
+name: Deploy Express App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Copy files to VPS
+        run: |
+          rsync -avz --delete ./ user@your-vps-address:/path/to/express-app/
+
+      - name: Install dependencies on VPS
+        run: |
+          ssh root@y217.154.2.82"
+          cd /path/to/express-app && 
+          npm install
+          "
+
+      - name: Restart PM2 service for Express
+        run: |
+          ssh user@your-vps-address "
+          cd /path/to/express-app &&
+          pm2 start server.js --name express-app || pm2 restart express-app
+          "
