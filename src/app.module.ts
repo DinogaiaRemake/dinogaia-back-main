@@ -6,17 +6,19 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { DinoModule } from './dino/dino.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [ 
+    ConfigModule.forRoot(),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'Phptest123!',
-      database: 'dinogaia_db',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '3306'),
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_DATABASE || 'dinogaia_db',
       autoLoadEntities: true,
       synchronize: true,
     }),
