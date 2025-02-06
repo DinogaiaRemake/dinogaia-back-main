@@ -19,8 +19,13 @@ async function bootstrap() {
         origin: (origin, callback) => {
             console.log("CORS Request Origin:", origin); // Debugging
 
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true);
+            if (!origin) {
+                callback(null, false); // Reject requests without origin (e.g., curl)
+                return;
+            }
+
+            if (allowedOrigins.includes(origin)) {
+                callback(null, origin); // Explicitly return the allowed origin
             } else {
                 console.error(`CORS blocked: ${origin}`);
                 callback(new Error("Not allowed by CORS"));
