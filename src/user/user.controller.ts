@@ -1,13 +1,11 @@
-import { Body, Controller, Post, Get, Param, Put, UseGuards, UnauthorizedException, BadRequestException, NotFoundException, Res } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Put, UseGuards, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { User } from './user.entity';
-import * as bcrypt from 'bcrypt';
-import { Response } from 'express';
-import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { DinoService } from '../dino/dino.service';
 import { CreateDinoDto } from '../dino/dto/create-dino.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('users')
 export class UserController {
@@ -63,18 +61,6 @@ export class UserController {
         }
     }
 
-    @Post('login')
-    async login(@Body() loginDto: { email: string; password: string }, @Res({ passthrough: true }) response: Response) {
-        const user = await this.userService.findOne({ email: loginDto.email });
-        if (!user || !(await bcrypt.compare(loginDto.password, user.password))) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
-
-        const token = this.jwtService.sign({ id: user.id });
-        response.cookie('jwt', token, { httpOnly: true, secure: false });
-        return { message: 'Login successful', jwt: token, user: user, status: "OK" };
-    }
-
     @Get()
     @UseGuards(AuthGuard)
     async getAllUsers(): Promise<User[]> {
@@ -96,7 +82,4 @@ export class UserController {
     async updateUser(@Param('id') id: number, @Body() userData: Partial<User>): Promise<User> {
         return this.userService.update(id, userData);
     }
-    
-
-
 }

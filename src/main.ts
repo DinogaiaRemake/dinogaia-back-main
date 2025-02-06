@@ -12,7 +12,8 @@ async function bootstrap() {
     origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'http://dinogaiaremake.fr'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Cookie'],
+    exposedHeaders: ['Set-Cookie'],
   });
   await app.listen(3000, '0.0.0.0');  // '0.0.0.0' permet de répondre sur toutes les interfaces réseau
 }
