@@ -11,8 +11,7 @@ async function bootstrap() {
     app.use(cookieParser());
 
     const allowedOrigins = [
-        "https://dinogaiaremake.fr",
-        "http://localhost:3001"
+        "https://dinogaiaremake.fr"
     ];
 
     app.enableCors({
