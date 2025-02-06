@@ -21,7 +21,17 @@ export class AuthController {
         }
 
         const token = this.jwtService.sign({ id: user.id });
-        response.cookie('jwt', token, { httpOnly: true, secure: false });
+        
+        // Configuration des cookies pour le développement et la production
+        const isProduction = process.env.NODE_ENV === 'production';
+        response.cookie('jwt', token, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
+            domain: isProduction ? 'dinogaiaremake.fr' : undefined,
+            path: '/'
+        });
+        
         return { message: 'Login successful', jwt: token, user: user, status: "OK" };
     }
 } 
