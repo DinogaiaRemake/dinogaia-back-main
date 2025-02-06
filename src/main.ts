@@ -9,7 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser());
 
-  const allowedOrigins = ['http://dinogaiaremake.fr', 'http://localhost:3001'];
+  const allowedOrigins = ['https://dinogaiaremake.fr', 'http://localhost:3001', 'https://dinogaiaremake.fr'];
 
   app.enableCors({
     origin: (origin, callback) => {
