@@ -9,12 +9,16 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser());
 
-  const allowedOrigins = process.env.NODE_ENV === 'production' 
-    ? ['http://dinogaiaremake.fr', 'https://dinogaiaremake.fr', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173']
-    : ['http://dinogaiaremake.fr', 'https://dinogaiaremake.fr', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173']
+  const allowedOrigins = ['http://dinogaiaremake.fr', 'http://localhost:3001'];
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Cookie', 'Set-Cookie'],
@@ -24,3 +28,4 @@ async function bootstrap() {
   await app.listen(3000, '0.0.0.0');  // '0.0.0.0' permet de répondre sur toutes les interfaces réseau
 }
 bootstrap();
+
