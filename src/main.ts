@@ -11,7 +11,8 @@ async function bootstrap() {
     app.use(cookieParser());
 
     const allowedOrigins = [
-        "https://dinogaiaremake.fr"
+        "https://dinogaiaremake.fr",
+        "http://localhost:3001"
     ];
 
     app.enableCors({
@@ -19,14 +20,15 @@ async function bootstrap() {
             console.log("CORS Request Origin:", origin); // Debugging
 
             if (!origin) {
-                callback(null, false); // Reject requests without origin (e.g., curl)
+                console.warn("⚠️ CORS Request with undefined origin - Allowing it.");
+                callback(null, true);  // Allow requests without an Origin header (server-side requests)
                 return;
             }
 
             if (allowedOrigins.includes(origin)) {
-                callback(null, origin); // Explicitly return the allowed origin
+                callback(null, origin); // Explicitly allow the known origin
             } else {
-                console.error(`CORS blocked: ${origin}`);
+                console.error(`⛔ CORS blocked: ${origin}`);
                 callback(new Error("Not allowed by CORS"));
             }
         },
