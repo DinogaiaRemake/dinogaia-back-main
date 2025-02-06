@@ -10,28 +10,9 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe());
     app.use(cookieParser());
 
-    const allowedOrigins = [
-        "https://dinogaiaremake.fr",
-        "http://localhost:3001"
-    ];
-
+    // Allow all origins
     app.enableCors({
-        origin: (origin, callback) => {
-            console.log("CORS Request Origin:", origin); // Debugging
-
-            if (!origin) {
-                console.warn("⚠️ CORS Request with undefined origin - Allowing it.");
-                callback(null, true);  // Allow requests without an Origin header (server-side requests)
-                return;
-            }
-
-            if (allowedOrigins.includes(origin)) {
-                callback(null, origin); // Explicitly allow the known origin
-            } else {
-                console.error(`⛔ CORS blocked: ${origin}`);
-                callback(new Error("Not allowed by CORS"));
-            }
-        },
+        origin: "*", // Allows requests from any origin
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allowedHeaders: [
@@ -45,7 +26,7 @@ async function bootstrap() {
     });
 
     await app.listen(3000, "0.0.0.0");
-    console.log("✅ Server is running on port 3000");
+    console.log("✅ Server is running on port 3000 with CORS enabled for all origins");
 }
 
 bootstrap();
