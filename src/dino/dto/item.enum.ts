@@ -116,7 +116,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         xpGain: 0
     },
     'epaulard_joueur': {
-        name: 'Epaulard joueur ★',
+        name: 'Epaulard joueur',
         type: ItemType.PREY,
         price: 180,
         description: 'Un épaulard joueur légendaire',
@@ -124,7 +124,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         xpGain: 0
     },
     'epaulard_joueur_dore': {
-        name: 'Epaulard joueur doré ★',
+        name: 'Epaulard joueur doré',
         type: ItemType.PREY,
         price: 250,
         description: 'Un épaulard joueur doré légendaire',

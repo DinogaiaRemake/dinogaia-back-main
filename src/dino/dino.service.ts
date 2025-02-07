@@ -30,7 +30,7 @@ export class DinoService {
         
         for (const dino of allDinos) {
             console.log("dino + cave de : " + dino.name + " " +dino.cave);
-            if (dino.hunger && dino.thirst) {
+            if (!dino.hunger && !dino.thirst) {
                 dino.height += 1;
                 dino.health += 10;
             }
@@ -42,8 +42,8 @@ export class DinoService {
                 }
             }
 
-            dino.hunger = false;
-            dino.thirst = false;
+            dino.hunger = true;
+            dino.thirst = true;
             dino.canHunt = true;
             if (dino.cave) {
                 dino.cave.isClean = false;

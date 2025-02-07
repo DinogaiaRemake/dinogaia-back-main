@@ -54,6 +54,10 @@ export class JobService {
         const jobConfig = JOB_CONFIG[newJob];
         if (!jobConfig) {
             throw new BadRequestException(`Métier ${newJob} non valide`);
+        }   
+
+        if (dino.job === newJob) {
+            throw new BadRequestException(`Le dinosaure ${dino.name} est déjà un ${newJob}`);
         }
 
         if (dino.emeralds < jobConfig.formation) {

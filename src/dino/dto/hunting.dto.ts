@@ -15,7 +15,7 @@ export interface Prey {
     rarity: number;  // 1-100
     xpGain: number;
     weightGain: number;
-    isLegendary?: boolean;  // Pour les proies avec ★
+    isLegendary?: boolean;  // Pour les proies avec 
 }
 
 export interface Danger {
@@ -119,7 +119,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         preys: [
             { name: 'hibou_hurleur', rarity: 45, xpGain: 10, weightGain: 1 },
             { name: 'poulpe_geant', rarity: 35, xpGain: 20, weightGain: 3 },
-            { name: 'epaulard_joueur', rarity: 20, xpGain: 15, weightGain: 2, isLegendary: true }
+            { name: 'epaulard_joueur', rarity: 20, xpGain: 15, weightGain: 2}
         ]
     },
     [HuntingZone.DRAGON_CAVE]: {

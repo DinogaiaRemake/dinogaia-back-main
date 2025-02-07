@@ -87,8 +87,15 @@ export class HuntingService {
 
     async hunt(dinoId: number, zone: HuntingZone): Promise<HuntingResponse> {
         const dino = await this.dinoService.findOne(dinoId);
+
+        
+
         if (!dino) {
             throw new NotFoundException(`Dinosaure avec l'ID ${dinoId} non trouvé`);
+        }
+
+        if (!dino.canHunt) {
+            throw new BadRequestException(`Le dinosaure ${dino.name} ne peut pas chasser il a déjà chassé aujourd'hui`);
         }
 
         const zoneConfig = HUNTING_ZONES[zone];
@@ -154,6 +161,7 @@ export class HuntingService {
         }
 
         // Sauvegarder les changements
+        dino.canHunt = false;
         await this.dinoService.update(dinoId, dino);
 
         return {
