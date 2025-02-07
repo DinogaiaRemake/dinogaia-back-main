@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { DinoModule } from './dino/dino.module';
+import { ForumModule } from './forum/forum.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 
@@ -24,7 +25,8 @@ import { ConfigModule } from '@nestjs/config';
     }),
     UserModule,
     AuthModule,
-    DinoModule
+    DinoModule,
+    ForumModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 import { Dino } from '../dino/dino.entity';
+import { Topic } from '../forum/topic.entity';
+import { TopicReply } from '../forum/topic-reply.entity';
 
 @Entity()
 export class User {
@@ -28,5 +30,9 @@ export class User {
     @OneToMany(() => Dino, dino => dino.user)
     dinos: Dino[];
 
-    
+    @OneToMany(() => Topic, topic => topic.author)
+    topics: Topic[];
+
+    @OneToMany(() => TopicReply, reply => reply.author)
+    topicReplies: TopicReply[];
 } 
