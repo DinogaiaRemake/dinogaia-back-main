@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Param, Put, UseGuards, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Put, UseGuards, UnauthorizedException, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { User } from './user.entity';
@@ -6,19 +6,27 @@ import { RegisterDto } from './dto/register.dto';
 import { DinoService } from '../dino/dino.service';
 import { CreateDinoDto } from '../dino/dto/create-dino.dto';
 import { JwtService } from '@nestjs/jwt';
+import { WhitelistService } from './whitelist.service';
 
 @Controller('users')
 export class UserController {
     constructor(
         private userService: UserService,
         private jwtService: JwtService,
-        private dinoService: DinoService
+        private dinoService: DinoService,
+        private whitelistService: WhitelistService
     ) {}
 
     @Post('register')
     async register(@Body() registerDto: RegisterDto): Promise<any> {
         try {
             console.log('Début register - RegisterDto reçu:', registerDto);
+
+            // Vérifier si l'email est dans la whitelist
+            const isWhitelisted = await this.whitelistService.isEmailWhitelisted(registerDto.email);
+            if (!isWhitelisted) {
+                throw new ForbiddenException('Votre email n\'est pas autorisé à s\'inscrire. Veuillez contacter l\'administrateur.');
+            }
 
             if (!/^[a-zA-Z0-9]+$/.test(registerDto.name)) {
                 throw new BadRequestException('Vous ne pouvez pas utiliser de caractères spéciaux dans votre nom');

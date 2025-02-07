@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Param, UseGuards, Request, Query } from '@
 import { ForumService } from './forum.service';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
-import { PaginationDto } from './dto/pagination.dto';
 import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('forum')
@@ -16,16 +15,13 @@ export class ForumController {
   }
 
   @Get('topics')
-  async getAllTopics(@Query() pagination: PaginationDto) {
-    return this.forumService.getAllTopics(pagination);
+  async getAllTopics() {
+    return this.forumService.getAllTopics();
   }
 
   @Get('topics/:id')
-  async getTopicById(
-    @Param('id') id: number,
-    @Query() pagination: PaginationDto
-  ) {
-    return this.forumService.getTopicById(id, pagination);
+  async getTopicById(@Param('id') id: number) {
+    return this.forumService.getTopicById(id);
   }
 
   @Post('topics/:id/replies')

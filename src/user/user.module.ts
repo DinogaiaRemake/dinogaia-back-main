@@ -5,6 +5,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { DinoModule } from '../dino/dino.module';
+import { WhitelistService } from './whitelist.service';
 
 @Module({
     imports: [
@@ -16,7 +17,7 @@ import { DinoModule } from '../dino/dino.module';
         forwardRef(() => DinoModule)
     ],
     controllers: [UserController],
-    providers: [UserService],
+    providers: [UserService, WhitelistService],
     exports: [UserService, JwtModule]
 })
 export class UserModule {}

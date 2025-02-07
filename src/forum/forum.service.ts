@@ -6,8 +6,6 @@ import { TopicReply } from './topic-reply.entity';
 import { User } from '../user/user.entity';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
-import { PaginationDto } from './dto/pagination.dto';
-
 @Injectable()
 export class ForumService {
   constructor(
@@ -25,62 +23,23 @@ export class ForumService {
     return this.topicRepository.save(topic);
   }
 
-  async getAllTopics(pagination: PaginationDto) {
-    const page = pagination.page || 1;
-    const limit = pagination.limit || 10;
-
-    const [topics, total] = await this.topicRepository.findAndCount({
+  async getAllTopics(): Promise<Topic[]> {
+    return this.topicRepository.find({
       relations: ['author'],
       order: { createdAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
     });
-
-    return {
-      items: topics,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    };
   }
 
-  async getTopicById(id: number, replyPagination: PaginationDto) {
-    const page = replyPagination.page || 1;
-    const limit = replyPagination.limit || 10;
-
+  async getTopicById(id: number): Promise<Topic> {
     const topic = await this.topicRepository.findOne({
       where: { id },
-      relations: ['author'],
+      relations: ['author', 'replies', 'replies.author'],
     });
-
     if (!topic) {
       throw new NotFoundException(`Topic #${id} not found`);
     }
-
-    const [replies, totalReplies] = await this.replyRepository.findAndCount({
-      where: { topic: { id } },
-      relations: ['author'],
-      order: { createdAt: 'ASC' },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-
     topic.views += 1;
-    await this.topicRepository.save(topic);
-
-    return {
-      ...topic,
-      replies,
-      replyMeta: {
-        total: totalReplies,
-        page,
-        limit,
-        totalPages: Math.ceil(totalReplies / limit)
-      }
-    };
+    return this.topicRepository.save(topic);
   }
 
   async createReply(topicId: number, createReplyDto: CreateReplyDto, user: User): Promise<TopicReply> {
