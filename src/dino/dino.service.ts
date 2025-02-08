@@ -208,7 +208,7 @@ export class DinoService {
     // Faire boire un dinosaure
     async drink(id: number): Promise<Dino> {
         const dino = await this.findOne(id);
-        dino.thirst = true;
+        dino.thirst = false;
         
         // Mettre à jour la dernière action
         dino.lastAction = new Date();

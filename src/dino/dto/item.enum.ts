@@ -399,7 +399,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
             strength: 1
         }
     },
-    'tapis_de_course': {
+    'tapis_course': {
         name: 'Tapis de course',
         type: ItemType.SKILL,
         price: 5,
