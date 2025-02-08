@@ -10,6 +10,7 @@ import { CaveService } from './cave.service';
 import { Cave } from './cave.entity';
 import { getRandomClanForSpecies } from './dto/clan.enum';
 import { TREX_LEVELS, VELOCIRAPTOR_LEVELS, PTERODACTYLE_LEVELS, MEGALODON_LEVELS, LevelRequirements } from './dto/level-requirements';
+import { Not } from 'typeorm';
 
 @Injectable()
 export class DinoService {
@@ -283,5 +284,23 @@ export class DinoService {
         });
     }
     
-    
+    async findAllPaginatedExceptUser(
+        userId: number,
+        page: number = 1,
+        limit: number = 10
+    ): Promise<{ dinos: Dino[], total: number }> {
+        const [dinos, total] = await this.dinoRepository.findAndCount({
+            where: {
+                userId: Not(userId)
+            },
+            order: {
+                lastAction: 'DESC'
+            },
+            skip: (page - 1) * limit,
+            take: limit,
+            relations: ['user', 'cave']
+        });
+
+        return { dinos, total };
+    }
 }

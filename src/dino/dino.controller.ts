@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, UseGuards, Request, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, UseGuards, Request, NotFoundException, Query, DefaultValuePipe } from '@nestjs/common';
 import { DinoService } from './dino.service';
 import { Dino } from './dino.entity';
 import { CreateDinoDto, DinoSpecies } from './dto/create-dino.dto';
@@ -27,6 +27,59 @@ export class DinoController {
     @UseGuards(AuthGuard)
     async getAllActiveDinos(): Promise<Dino[]> {
         return await this.dinoService.getAllActiveDinos();
+    }
+
+    @Get('list-all')
+    @UseGuards(AuthGuard)
+    async getAllPaginated(
+        @Request() req,
+        @Query('page') page = '1',
+        @Query('limit') limit = '10'
+    ): Promise<{ dinos: Dino[], total: number }> {
+        return await this.dinoService.findAllPaginatedExceptUser(
+            req.user.id,
+            parseInt(page),
+            parseInt(limit)
+        );
+    }
+
+    @Get('my/dinos')
+    @UseGuards(AuthGuard)
+    async findMyDinos(@Request() req): Promise<any[]> {
+        const dinos = await this.dinoService.findByUserId(req.user.id);
+        return dinos.map(dino => {
+            const age = new Date().getTime() - dino.createdAt.getTime();
+            const days = Math.floor(age / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((age % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((age % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return {
+                id: dino.id,
+                name: dino.name,
+                level: dino.level,
+                species: dino.species,
+                clan: dino.clan,
+                sex: dino.sex,
+                createdAt: dino.createdAt,
+                age: {
+                    days,
+                    hours,
+                    minutes
+                },
+                weight: dino.weight,
+                height: dino.height,
+                intelligence: dino.intelligence,
+                agility: dino.agility,
+                strength: dino.strength,
+                endurance: dino.endurance,
+                experience: dino.experience,
+                health: dino.health,
+                hunger: dino.hunger,
+                thirst: dino.thirst,
+                emeralds: dino.emeralds,
+                job: dino.job,
+            };
+        });
     }
 
     @Get(':id')
@@ -68,47 +121,6 @@ export class DinoController {
     @Get('clan/:clan')
     async findByClan(@Param('clan') clan: string): Promise<Dino[]> {
         return await this.dinoService.findByClan(clan);
-    }
-
-    @Get('my/dinos')
-    @UseGuards(AuthGuard)
-    async findMyDinos(@Request() req): Promise<any[]> {
-        const dinos = await this.dinoService.findByUserId(req.user.id);
-        return dinos.map(dino => {
-            const age = new Date().getTime() - dino.createdAt.getTime();
-            const days = Math.floor(age / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((age % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((age % (1000 * 60 * 60)) / (1000 * 60));
-            
-            return {
-                id: dino.id,
-                name: dino.name,
-                level: dino.level,
-                species: dino.species,
-                clan: dino.clan,
-                sex: dino.sex,
-                createdAt: dino.createdAt,
-                age: {
-                    days,
-                    hours,
-                    minutes
-                },
-                weight: dino.weight,
-                height: dino.height,
-                intelligence: dino.intelligence,
-                agility: dino.agility,
-                strength: dino.strength,
-                endurance: dino.endurance,
-                experience: dino.experience,
-
-                health: dino.health,
-                hunger: dino.hunger,
-                thirst: dino.thirst,
-                emeralds: dino.emeralds,
-                job: dino.job,
-
-            };
-        });
     }
 
     @Get(':id/cave')
@@ -161,5 +173,4 @@ export class DinoController {
         }
         return await this.dinoService.levelUp(id);
     }
-
 }

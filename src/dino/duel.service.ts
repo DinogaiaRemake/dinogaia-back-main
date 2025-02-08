@@ -38,6 +38,11 @@ export class DuelService {
             throw new ForbiddenException('Un dinosaure ne peut pas se battre contre lui-même');
         }
 
+        // Vérification des mouvements
+        if (createDuelDto.attacks.length !== 3 || createDuelDto.defenses.length !== 3) {
+            throw new ForbiddenException('Il faut exactement 3 attaques et 3 défenses');
+        }
+
         const duel = this.duelRepository.create({
             challenger,
             opponent,
@@ -73,7 +78,7 @@ export class DuelService {
         duel.status = DuelStatus.ACCEPTED;
         duel.opponentMoves = opponentMoves;
 
-        const result = this.calculateDuelResult(duel);
+        const result = await this.calculateDuelResult(duel);
         duel.result = result;
         duel.status = DuelStatus.COMPLETED;
 
@@ -146,18 +151,55 @@ export class DuelService {
             .getMany();
     }
 
-    private calculateDuelResult(duel: Duel): DuelResult {
+    private async calculateRewards(winner: Dino, loser: Dino): Promise<{ xp: number, emeralds: number }> {
+        // Calcul du ratio de niveau
+        const levelRatio = Math.min(2, Math.max(0.5, loser.level / winner.level));
+
+        // Calcul du ratio de stats totales
+        const winnerStats = winner.strength + winner.agility + winner.intelligence + winner.endurance;
+        const loserStats = loser.strength + loser.agility + loser.intelligence + loser.endurance;
+        const statsRatio = Math.min(2, Math.max(0.5, loserStats / winnerStats));
+
+        // Calcul de l'XP (entre 1 et 8)
+        const baseXP = 4; // Valeur de base médiane
+        const xpMultiplier = levelRatio * statsRatio;
+        const finalXP = Math.max(1, Math.min(8, Math.round(baseXP * xpMultiplier)));
+
+        // Calcul des émeraudes (entre 1 et 6)
+        const baseEmeralds = 3; // Valeur de base médiane
+        const emeraldMultiplier = (levelRatio + statsRatio) / 2;
+        const finalEmeralds = Math.max(1, Math.min(6, Math.round(baseEmeralds * emeraldMultiplier)));
+
+        //distribute the xp and emeralds to the winner 
+        winner.experience += finalXP;
+        winner.emeralds += finalEmeralds;
+
+        //save the winner and the loser
+        await this.dinoRepository.save(winner);
+        await this.dinoRepository.save(loser);
+
+        return {
+            xp: finalXP,
+            emeralds: finalEmeralds
+        };
+    }
+
+    private async calculateDuelResult(duel: Duel): Promise<DuelResult> {
         const rounds: DuelRound[] = [];
         let challengerDamage = 0;
         let opponentDamage = 0;
 
-        // Points de vie simulés (ne seront pas sauvegardés)
+        // Utiliser la vie actuelle des dinosaures
         let challengerHP = duel.challenger.health;
         let opponentHP = duel.opponent.health;
 
-        // Calculer les dégâts pour chaque round
-        for (let i = 0; i < 3; i++) {
-            const round = {
+        const startingHP = {
+            challenger: challengerHP,
+            opponent: opponentHP
+        };
+
+        for (let i = 0; i < 3 && (challengerHP > 0 && opponentHP > 0); i++) {
+            const round: DuelRound = {
                 round: i + 1,
                 challengerAttack: duel.challengerMoves.attacks[i],
                 challengerDefense: duel.challengerMoves.defenses[i],
@@ -167,119 +209,156 @@ export class DuelService {
                 opponentDamage: 0
             };
 
-            // Les deux attaquent simultanément
-            const challengerDamageThisRound = this.calculateDamage(
-                duel.challenger,
-                duel.opponent,
-                round.challengerAttack,
-                round.opponentDefense
-            );
+            // Le challenger attaque en premier
+            if (challengerHP > 0) {
+                round.opponentDamage = this.calculateDamage(
+                    duel.challenger,
+                    duel.opponent,
+                    round.challengerAttack,
+                    round.opponentDefense
+                );
+                opponentHP -= round.opponentDamage;
+            }
 
-            const opponentDamageThisRound = this.calculateDamage(
-                duel.opponent,
-                duel.challenger,
-                round.opponentAttack,
-                round.challengerDefense
-            );
+            // L'opposant attaque seulement s'il est encore en vie
+            if (opponentHP > 0) {
+                round.challengerDamage = this.calculateDamage(
+                    duel.opponent,
+                    duel.challenger,
+                    round.opponentAttack,
+                    round.challengerDefense
+                );
+                challengerHP -= round.challengerDamage;
+            }
 
-            // Appliquer les dégâts simultanément
-            round.challengerDamage = opponentDamageThisRound;
-            round.opponentDamage = challengerDamageThisRound;
-            
-            challengerDamage += opponentDamageThisRound;
-            opponentDamage += challengerDamageThisRound;
-            
-            challengerHP -= opponentDamageThisRound;
-            opponentHP -= challengerDamageThisRound;
+            challengerDamage += round.challengerDamage;
+            opponentDamage += round.opponentDamage;
 
             rounds.push(round);
+        }
 
-            // Vérifier si l'un des deux est KO
-            if (challengerHP <= 0 || opponentHP <= 0) {
-                break;
+        // Détermination du vainqueur et du perdant
+        let winner: number;
+        let winnerDino: Dino;
+        let loserDino: Dino;
+
+        // Calcul de la vie restante
+        const challengerRemainingHP = startingHP.challenger - challengerDamage;
+        const opponentRemainingHP = startingHP.opponent - opponentDamage;
+
+        if (challengerHP <= 0 && opponentHP <= 0) {
+            // En cas de double KO, celui qui a le plus de vie restante gagne
+            if (challengerRemainingHP >= opponentRemainingHP) {
+                winner = duel.challenger.id;
+                winnerDino = duel.challenger;
+                loserDino = duel.opponent;
+            } else {
+                winner = duel.opponent.id;
+                winnerDino = duel.opponent;
+                loserDino = duel.challenger;
+            }
+        } else if (challengerHP <= 0) {
+            winner = duel.opponent.id;
+            winnerDino = duel.opponent;
+            loserDino = duel.challenger;
+        } else if (opponentHP <= 0) {
+            winner = duel.challenger.id;
+            winnerDino = duel.challenger;
+            loserDino = duel.opponent;
+        } else {
+            // Celui qui a le plus de vie restante gagne
+            if (challengerRemainingHP >= opponentRemainingHP) {
+                winner = duel.challenger.id;
+                winnerDino = duel.challenger;
+                loserDino = duel.opponent;
+            } else {
+                winner = duel.opponent.id;
+                winnerDino = duel.opponent;
+                loserDino = duel.challenger;
             }
         }
 
-        // Déterminer le gagnant en fonction des points de vie restants
-        const winner = challengerHP <= 0 && opponentHP <= 0 ? (opponentDamage > challengerDamage ? duel.challenger.id : duel.opponent.id) :
-                      challengerHP <= 0 ? duel.opponent.id :
-                      opponentHP <= 0 ? duel.challenger.id :
-                      challengerHP > opponentHP ? duel.challenger.id : duel.opponent.id;
+        // Calcul des récompenses
+        const rewards = await this.calculateRewards(winnerDino, loserDino);
 
         return {
             winner,
             challengerDamage,
             opponentDamage,
             rounds,
+            startingHP,
             remainingHP: {
                 challenger: Math.max(0, challengerHP),
                 opponent: Math.max(0, opponentHP)
-            }
+            },
+            rewards
         };
     }
 
-    private calculateDamage(attacker: Dino, defender: Dino, attackZone: AttackZone, defenseZone: AttackZone): number {
-        // Calculer le ratio d'attaque basé sur les stats et la zone d'attaque
-        let attackRatio = 0;
-        switch (attackZone) {
-            case AttackZone.HEAD:
-                // Attaque à la tête : intelligence + agilité
-                attackRatio = (attacker.intelligence * 0.6 + attacker.agility * 0.4);
-                break;
-            case AttackZone.BODY:
-                // Attaque au corps : force + endurance
-                attackRatio = (attacker.strength * 0.6 + attacker.endurance * 0.4);
-                break;
-            case AttackZone.LEGS:
-                // Attaque aux jambes : agilité + force
-                attackRatio = (attacker.agility * 0.6 + attacker.strength * 0.4);
-                break;
-        }
+    private calculateDamage(
+        attacker: Dino,
+        defender: Dino,
+        attackZone: AttackZone,
+        defenseZone: AttackZone
+    ): number {
+        // Calcul des stats d'attaque selon la zone
+        const attackStats = this.getZoneStats(attacker, attackZone, true);
+        const defenseStats = this.getZoneStats(defender, defenseZone, false);
 
-        // Calculer le ratio de défense basé sur les stats et la zone de défense
-        let defenseRatio = 0;
-        switch (defenseZone) {
-            case AttackZone.HEAD:
-                // Défense de la tête : intelligence + endurance
-                defenseRatio = (defender.intelligence * 0.6 + defender.endurance * 0.4);
-                break;
-            case AttackZone.BODY:
-                // Défense du corps : endurance + force
-                defenseRatio = (defender.endurance * 0.6 + defender.strength * 0.4);
-                break;
-            case AttackZone.LEGS:
-                // Défense des jambes : agilité + endurance
-                defenseRatio = (defender.agility * 0.6 + defender.endurance * 0.4);
-                break;
-        }
-
-        // Calculer les dégâts de base
-        let baseDamage = 15 * (attackRatio / defenseRatio) * (attacker.level / defender.level);//5 10.4
-
-        // Bonus/Malus selon la correspondance attaque/défense
+        // Calcul du ratio d'efficacité
+        let effectiveness = 1.0;
         if (attackZone === defenseZone) {
-            // Défense parfaite : réduction importante des dégâts
-            baseDamage *= 0.3;
+            effectiveness = 0.5; // Défense parfaite
         } else {
-            // Bonus selon les zones
-            switch (attackZone) {
-                case AttackZone.HEAD:
-                    if (defenseZone === AttackZone.LEGS) baseDamage *= 1.2; // Bonus contre les jambes
-                    break;
-                case AttackZone.BODY:
-                    if (defenseZone === AttackZone.HEAD) baseDamage *= 1.2; // Bonus contre la tête
-                    break;
-                case AttackZone.LEGS:
-                    if (defenseZone === AttackZone.BODY) baseDamage *= 1.2; // Bonus contre le corps
-                    break;
-            }
+            // Système de bonus type pierre-papier-ciseaux
+            effectiveness = this.getZoneEffectiveness(attackZone, defenseZone);
         }
 
-        // Facteur aléatoire réduit pour plus de prévisibilité
-        const randomFactor = 0.9 + Math.random() * 0.2; // Entre 0.9 et 1.1
-        baseDamage *= randomFactor;
+        // Calcul du ratio attaque/défense avec une formule logarithmique pour réduire les écarts
+        const statRatio = Math.log10(attackStats / defenseStats + 1);
 
-        // Limiter les dégâts entre 5 et 35 pour équilibrer
-        return Math.max(5, Math.min(35, Math.round(baseDamage)));
+        // Formule de dégâts révisée
+        const baseDamage = 15 * statRatio * effectiveness;
+        
+        // Facteur de niveau atténué
+        const levelFactor = Math.pow(attacker.level / defender.level, 0.2); // Exposant 0.2 pour réduire l'impact du niveau
+        
+        // Facteur aléatoire très réduit (entre 0.95 et 1.05)
+        const randomFactor = 0.95 + Math.random() * 0.1;
+
+        // Calcul final des dégâts
+        const finalDamage = baseDamage * levelFactor * randomFactor;
+
+        // Limites de dégâts plus strictes
+        return Math.max(5, Math.min(25, Math.round(finalDamage)));
+    }
+
+    private getZoneStats(dino: Dino, zone: AttackZone, isAttack: boolean): number {
+        switch (zone) {
+            case AttackZone.HEAD:
+                return isAttack 
+                    ? (dino.intelligence * 0.7 + dino.agility * 0.3)
+                    : (dino.intelligence * 0.6 + dino.endurance * 0.4);
+            case AttackZone.BODY:
+                return isAttack
+                    ? (dino.strength * 0.7 + dino.endurance * 0.3)
+                    : (dino.endurance * 0.7 + dino.strength * 0.3);
+            case AttackZone.LEGS:
+                return isAttack
+                    ? (dino.agility * 0.7 + dino.strength * 0.3)
+                    : (dino.agility * 0.6 + dino.endurance * 0.4);
+            default:
+                return 0;
+        }
+    }
+
+    private getZoneEffectiveness(attackZone: AttackZone, defenseZone: AttackZone): number {
+        const effectiveness = {
+            [AttackZone.HEAD]: { [AttackZone.LEGS]: 1.3, [AttackZone.BODY]: 0.8 },
+            [AttackZone.BODY]: { [AttackZone.HEAD]: 1.3, [AttackZone.LEGS]: 0.8 },
+            [AttackZone.LEGS]: { [AttackZone.BODY]: 1.3, [AttackZone.HEAD]: 0.8 }
+        };
+
+        return effectiveness[attackZone]?.[defenseZone] || 1.0;
     }
 } 

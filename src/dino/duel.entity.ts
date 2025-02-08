@@ -29,9 +29,17 @@ export interface DuelResult {
     challengerDamage: number;
     opponentDamage: number;
     rounds: DuelRound[];
+    startingHP: {
+        challenger: number;
+        opponent: number;
+    };
     remainingHP: {
         challenger: number;
         opponent: number;
+    };
+    rewards: {
+        xp: number;
+        emeralds: number;
     };
 }
 
