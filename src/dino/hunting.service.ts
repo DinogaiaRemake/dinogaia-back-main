@@ -3,7 +3,15 @@ import { DinoService } from './dino.service';
 import { HuntingZone, HUNTING_ZONES, Prey, Danger } from './dto/hunting.dto';
 import { CaveService } from './cave.service';
 import { ItemType, ITEMS_CONFIG } from './dto/item.enum';
-import { HuntingResult, HuntingResponse } from './dto/hunting-result.dto';
+import { HuntingResult, HuntingResponse, RaidResult } from './dto/hunting-result.dto';
+
+interface InventoryItem {
+    quantity: number;
+    type: string;
+    displayName: string;
+    weightGain?: number;
+    xpGain?: number;
+}
 
 @Injectable()
 export class HuntingService {
@@ -166,6 +174,105 @@ export class HuntingService {
 
         return {
             events: results,
+        };
+    }
+
+    private async selectRandomTarget(attackerId: number): Promise<any> {
+        // Récupérer tous les dinos sauf l'attaquant
+        const allDinos = await this.dinoService.findAll();
+        const potentialTargets = allDinos.filter(dino => 
+            dino.id !== attackerId && 
+            dino.cave && // S'assurer que le dino a une grotte
+            Object.keys(dino.cave.inventory).length > 0 // S'assurer qu'il a des items
+        );
+
+        if (potentialTargets.length === 0) {
+            throw new BadRequestException('Aucune cible disponible pour le pillage');
+        }
+
+        // Sélectionner une cible au hasard
+        return potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
+    }
+
+    private selectRandomItem(inventory: Record<string, InventoryItem>): { itemKey: string; item: InventoryItem } {
+        // Récupérer tous les items avec une quantité > 0
+        const availableItems = Object.entries(inventory)
+            .filter(([_, item]) => item.quantity > 0);
+
+        if (availableItems.length === 0) {
+            throw new BadRequestException('Aucun item disponible dans l\'inventaire de la cible');
+        }
+
+        // Sélectionner un item au hasard
+        const [itemKey, item] = availableItems[Math.floor(Math.random() * availableItems.length)];
+        return { itemKey, item };
+    }
+
+    async raid(attackerDinoId: number): Promise<RaidResult> {
+        // Récupérer l'attaquant
+        const attacker = await this.dinoService.findOne(attackerDinoId);
+
+        // Vérifications
+        if (!attacker) {
+            throw new NotFoundException('Dinosaure non trouvé');
+        }
+
+        if (!attacker.canHunt) {
+            throw new BadRequestException('Vous avez déjà chassé aujourd\'hui');
+        }
+
+        // Sélectionner une cible aléatoire
+        const target = await this.selectRandomTarget(attackerDinoId);
+
+        // Sélectionner un item aléatoire de l'inventaire de la cible
+        const targetCave = await this.caveService.findOne(target.cave.id);
+        const { itemKey, item: targetItem } = this.selectRandomItem(targetCave.inventory);
+
+        // 30% de chance d'échec avec perte de HP
+        const raidSuccess = Math.random() > 0.3;
+        
+        // Désactiver la chasse pour l'attaquant
+        attacker.canHunt = false;
+        await this.dinoService.update(attackerDinoId, attacker);
+
+        if (!raidSuccess) {
+            // Échec du raid : perte de 20-40 HP
+            const healthDamage = Math.floor(Math.random() * 21) + 20; // 20-40
+            attacker.health = Math.max(0, attacker.health - healthDamage);
+            await this.dinoService.update(attackerDinoId, attacker);
+
+            return {
+                success: false,
+                healthDamage,
+                targetDino: {
+                    id: target.id,
+                    name: target.name
+                },
+                message: `Le pillage contre ${target.name} a échoué ! Vous avez perdu ${healthDamage} points de vie.`
+            };
+        }
+
+        // Succès du raid
+        const stolenQuantity = targetItem.quantity; // On vole tout
+        
+        // Retirer l'item de l'inventaire de la cible
+        await this.caveService.removeFromInventory(target.cave.id, itemKey, stolenQuantity);
+        
+        // Ajouter l'item à l'inventaire de l'attaquant
+        await this.caveService.addToInventory(attacker.cave.id, itemKey, stolenQuantity);
+
+        return {
+            success: true,
+            stolenItems: [{
+                itemKey,
+                displayName: targetItem.displayName,
+                quantity: stolenQuantity
+            }],
+            targetDino: {
+                id: target.id,
+                name: target.name
+            },
+            message: `Pillage réussi contre ${target.name} ! Vous avez volé ${stolenQuantity}x ${targetItem.displayName}.`
         };
     }
 } 

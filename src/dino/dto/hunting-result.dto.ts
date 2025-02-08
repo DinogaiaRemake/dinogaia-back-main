@@ -18,6 +18,21 @@ export interface HuntingDangerResult {
     emeraldLoss?: number;
 }
 
+export interface RaidResult {
+    success: boolean;
+    healthDamage?: number;
+    stolenItems?: {
+        itemKey: string;
+        displayName: string;
+        quantity: number;
+    }[];
+    targetDino: {
+        id: number;
+        name: string;
+    };
+    message: string;
+}
+
 export type HuntingResult = HuntingPreyResult | HuntingDangerResult;
 
 export interface HuntingResponse {

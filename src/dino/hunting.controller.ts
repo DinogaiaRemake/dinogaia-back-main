@@ -9,6 +9,10 @@ class HuntDto {
     zone: HuntingZone;
 }
 
+class RaidDto {
+    attackerDinoId: number;
+}
+
 @Controller('hunting')
 export class HuntingController {
     constructor(private readonly huntingService: HuntingService) {}
@@ -20,5 +24,13 @@ export class HuntingController {
         @Body('zone') zone: HuntingZone
     ): Promise<HuntingResponse> {
         return await this.huntingService.hunt(dinoId, zone);
+    }
+
+    @Post('raid')
+    @UseGuards(AuthGuard)
+    async raid(
+        @Body('attackerDinoId', ParseIntPipe) attackerDinoId: number
+    ) {
+        return await this.huntingService.raid(attackerDinoId);
     }
 } 
