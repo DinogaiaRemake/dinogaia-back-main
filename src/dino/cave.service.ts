@@ -143,6 +143,19 @@ export class CaveService {
         return cave.inventory;
     }
 
+    async getWeapons(id: number): Promise<any> {
+        const cave = await this.findOne(id);
+        const weapons = {};
+        
+        for (const [itemKey, item] of Object.entries(cave.inventory)) {
+            if (ITEMS_CONFIG[itemKey]?.type === ItemType.WEAPON) {
+                weapons[itemKey] = item;
+            }
+        }
+        
+        return weapons;
+    }
+
     async useItem(id: number, itemKey: string, quantity: number): Promise<{ message: string; cave: Cave }> {
         const cave = await this.findOne(id);
         const itemConfig = ITEMS_CONFIG[itemKey];

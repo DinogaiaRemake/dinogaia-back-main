@@ -20,6 +20,18 @@ class AddInventoryItemDto {
 export class CaveController {
     constructor(private readonly caveService: CaveService) {}
 
+    @Get(':id/inventory')
+    @UseGuards(AuthGuard)
+    async getInventory(@Param('id', ParseIntPipe) id: number) {
+        return await this.caveService.getInventory(id);
+    }
+
+    @Get(':id/weapons')
+    @UseGuards(AuthGuard)
+    async getWeapons(@Param('id', ParseIntPipe) id: number) {
+        return await this.caveService.getWeapons(id);
+    }
+
     @Post(':id/inventory')
     @UseGuards(AuthGuard)
     async addToInventory(

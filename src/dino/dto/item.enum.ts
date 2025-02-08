@@ -410,24 +410,74 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
     },
 
     // Armes
-    'griffe_acier': {
-        name: 'Griffe d\'acier',
+    'lance_pierre': {
+        name: 'Lance-pierre',
         type: ItemType.WEAPON,
-        price: 500,
-        description: 'Augmente le nombre de proies capturées',
+        price: 20,
+        description: 'Cette arme de très courte portée mais bon marché te permettra d\'effectuer 1 à 2 évènements par chasse.',
         weaponStats: {
-            minPreys: 2,
+            minPreys: 1,
+            maxPreys: 2
+        }
+    },
+    'lance': {
+        name: 'Lance',
+        type: ItemType.WEAPON,
+        price: 60,
+        description: 'Légère, puissante et facile à manier, la lance te permettra d\'effectuer 1 à 4 évènements par chasse.',
+        weaponStats: {
+            minPreys: 1,
             maxPreys: 4
         }
     },
-    'fusil_de_chasse': {
+    'arbalete': {
+        name: 'Arbalète',
+        type: ItemType.WEAPON,
+        price: 250,
+        description: 'Alliant à la fois portée et puissance, l\'arbalète te permettra d\'effectuer 3 à 5 évènements par chasse.',
+        weaponStats: {
+            minPreys: 3,
+            maxPreys: 5
+        }
+    },
+    'fusil_chasse': {
         name: 'Fusil de chasse',
         type: ItemType.WEAPON,
-        price: 800,
-        description: 'Augmente significativement le nombre de proies capturées',
+        price: 600,
+        description: 'Sa puissance de feu et sa maniabilité en font l\'arme idéale pour partir en chasse. Tu pourras effectuer 4 à 6 évènements par chasse.',
         weaponStats: {
             minPreys: 4,
             maxPreys: 6
+        }
+    },
+    'fusil_lunette': {
+        name: 'Fusil à lunette',
+        type: ItemType.WEAPON,
+        price: 1250,
+        description: 'L\'arme de précision par excellence. Avec elle, rien ne t\'échappera et tu pourras effectuer 5 à 7 évènements par chasse.',
+        weaponStats: {
+            minPreys: 5,
+            maxPreys: 7
+        }
+    },
+    'lance_roquettes': {
+        name: 'Lance-roquettes',
+        type: ItemType.WEAPON,
+        price: 2200,
+        description: 'La puissance dévastatrice de ses roquettes te permettra d\'effectuer une valeur constante de 7 évènements à chaque chasse !',
+        weaponStats: {
+            minPreys: 7,
+            maxPreys: 7
+        }
+    },
+    'bazooka': {
+        name: 'Bazooka',
+        type: ItemType.WEAPON,
+        price: 2400,
+        description: 'Issu des armureries du grand conseil, le bazooka affiche une puissance qui n\'a d\'égale que son imprévisibilité. Il te permet d\'effectuer 1 à 16 évènements par chasse.',
+        weaponStats: {
+            minPreys: 1,
+            maxPreys: 16
         }
     }
 }; 

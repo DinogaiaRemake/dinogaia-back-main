@@ -20,26 +20,39 @@ export class HuntingService {
         private caveService: CaveService
     ) {}
 
-    private calculateEventCount(dino: any, zone: HuntingZone): number {
-        const zoneConfig = HUNTING_ZONES[zone];
-        const baseCount = zoneConfig.baseEventCount;
-        const maxEvents = zoneConfig.maxEvents;
+    private calculateEventCount(dino: any, zone: HuntingZone, weaponKey?: string): number {
+        const maxEvents = HUNTING_ZONES[zone].maxEvents;
+        let eventCount;
 
-        // Les chasseurs professionnels peuvent avoir jusqu'à 2 événements supplémentaires
-        const bonusEvents = dino.job === 'chasseur_professionnel' ? Math.floor(Math.random() * 3) : 0;
+        if (weaponKey) {
+            const weapon = ITEMS_CONFIG[weaponKey];
+            if (weapon?.type === ItemType.WEAPON && weapon.weaponStats) {
+                // Nombre d'événements basé sur les stats de l'arme
+                eventCount = Math.floor(Math.random() * (weapon.weaponStats.maxPreys - weapon.weaponStats.minPreys + 1)) + weapon.weaponStats.minPreys;
+                console.log(`[HUNT] 🗡️ Avec arme ${weapon.name}, nombre d'événements: ${eventCount} (min: ${weapon.weaponStats.minPreys}, max: ${weapon.weaponStats.maxPreys})`);
+            }
+        } else {
+            // Sans arme, un seul événement
+            eventCount = 1;
+            console.log(`[HUNT] 👊 Sans arme, nombre d'événements: ${eventCount}`);
+        }
 
-        return Math.min(baseCount + bonusEvents, maxEvents);
+        // Bonus chasseur professionnel
+        if (dino.job === 'chasseur_professionnel') {
+            const bonusEvents = Math.floor(Math.random() * 3);
+            console.log(`[HUNT] 🎯 Bonus chasseur professionnel: +${bonusEvents}`);
+            eventCount += bonusEvents;
+        }
+
+        const finalCount = Math.min(eventCount, maxEvents);
+        console.log(`[HUNT] 📊 Nombre final d'événements: ${finalCount} (max possible: ${maxEvents})`);
+        return finalCount;
     }
 
-    private selectRandomEvents(dino: any, zone: HuntingZone): Array<Prey | Danger> {
+    private selectRandomEvents(dino: any, zone: HuntingZone, weaponKey?: string): Array<Prey | Danger> {
         const zoneConfig = HUNTING_ZONES[zone];
-        const eventCount = this.calculateEventCount(dino, zone);
+        const eventCount = this.calculateEventCount(dino, zone, weaponKey);
         const events: Array<Prey | Danger> = [];
-
-        // Vérifier si le dino a une arme équipée
-        const weapon = Object.values(dino.cave.inventory).find(item => 
-            (item as any).type === ItemType.WEAPON && (item as any).quantity > 0
-        );
 
         for (let i = 0; i < eventCount; i++) {
             const isPreyEvent = Math.random() > 0.3; // 70% de chance d'avoir une proie
@@ -47,16 +60,6 @@ export class HuntingService {
             if (isPreyEvent) {
                 const availablePreys = zoneConfig.preys;
                 const prey = this.selectRandomPrey(availablePreys);
-                
-                // Si une arme est équipée, augmenter le nombre de proies
-                if (weapon) {
-                    const weaponStats = (weapon as any).weaponStats;
-                    const extraPreys = Math.floor(Math.random() * (weaponStats.maxPreys - weaponStats.minPreys + 1)) + weaponStats.minPreys;
-                    for (let j = 0; j < extraPreys - 1; j++) {
-                        events.push(prey);
-                    }
-                }
-                
                 events.push(prey);
             } else {
                 const availableDangers = zoneConfig.dangers;
@@ -72,31 +75,64 @@ export class HuntingService {
         // Vérifier que la somme des raretés est égale à 100
         const totalRarity = preys.reduce((sum, prey) => sum + prey.rarity, 0);
         if (Math.abs(totalRarity - 100) > 0.01) {
-            console.warn(`La somme des raretés (${totalRarity}) n'est pas égale à 100 pour cette zone !`);
+            console.warn(`[HUNT] ⚠️ La somme des raretés (${totalRarity}%) n'est pas égale à 100% pour cette zone !`);
         }
 
+        console.log('\n[HUNT] 🎲 Tirage des probabilités de proies:');
+        console.log('----------------------------------------');
+        
         // Utiliser directement la rareté comme probabilité
         let random = Math.random() * 100;
+        console.log(`🎯 Tirage: ${random.toFixed(2)}%`);
+        console.log('----------------------------------------');
         
+        let currentThreshold = 0;
         for (const prey of preys) {
-            if (random <= prey.rarity) {
+            currentThreshold += prey.rarity;
+            const padding = ' '.repeat(20 - prey.name.length);
+            console.log(`${prey.name}${padding}${prey.rarity}% ${this.createProgressBar(currentThreshold)}`);
+            if (random <= currentThreshold) {
+                console.log('----------------------------------------');
+                console.log(`✨ Proie sélectionnée: ${prey.name} (${prey.rarity}%)`);
+                console.log('----------------------------------------\n');
                 return prey;
             }
-            random -= prey.rarity;
         }
         
         // Si par un cas improbable on arrive ici, on retourne la dernière proie
-        return preys[preys.length - 1];
+        const lastPrey = preys[preys.length - 1];
+        console.log('----------------------------------------');
+        console.log(`⚠️ Cas improbable, sélection de: ${lastPrey.name}`);
+        console.log('----------------------------------------\n');
+        return lastPrey;
+    }
+
+    private createProgressBar(value: number): string {
+        const barLength = 20;
+        const filledLength = Math.floor((value / 100) * barLength);
+        const emptyLength = barLength - filledLength;
+        return `[${'■'.repeat(filledLength)}${'.'.repeat(emptyLength)}] ${value}%`;
     }
 
     private getItemKeyFromPreyName(preyName: string): string {
         return preyName.toLowerCase().replace(/ /g, '_');
     }
 
-    async hunt(dinoId: number, zone: HuntingZone): Promise<HuntingResponse> {
+    async hunt(dinoId: number, zone: HuntingZone, weaponKey?: string): Promise<HuntingResponse> {
         const dino = await this.dinoService.findOne(dinoId);
+        const cave = await this.caveService.findByDinoId(dinoId);
 
-        
+        if (!HUNTING_ZONES[zone]) {
+            throw new NotFoundException(`Zone de chasse ${zone} non trouvée`);
+        }
+
+        // Vérifier si l'arme existe et est dans l'inventaire
+        if (weaponKey) {
+            const weapons = await this.caveService.getWeapons(cave.id);
+            if (!weapons[weaponKey] || weapons[weaponKey].quantity <= 0) {
+                throw new BadRequestException(`L'arme ${weaponKey} n'est pas disponible dans l'inventaire`);
+            }
+        }
 
         if (!dino) {
             throw new NotFoundException(`Dinosaure avec l'ID ${dinoId} non trouvé`);
@@ -119,7 +155,7 @@ export class HuntingService {
             throw new NotFoundException(`Quête ${zoneConfig.quest} requise pour accéder à cette zone`);
         }
 
-        const events = this.selectRandomEvents(dino, zone);
+        const events = this.selectRandomEvents(dino, zone, weaponKey);
         const results: HuntingResult[] = [];
 
         // Traiter chaque événement

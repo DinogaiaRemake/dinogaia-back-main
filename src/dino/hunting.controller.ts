@@ -7,6 +7,7 @@ import { HuntingResponse } from './dto/hunting-result.dto';
 class HuntDto {
     dinoId: number;
     zone: HuntingZone;
+    weaponKey?: string;
 }
 
 class RaidDto {
@@ -21,9 +22,10 @@ export class HuntingController {
     @UseGuards(AuthGuard)
     async hunt(
         @Body('dinoId', ParseIntPipe) dinoId: number,
-        @Body('zone') zone: HuntingZone
+        @Body('zone') zone: HuntingZone,
+        @Body('weaponKey') weaponKey?: string
     ): Promise<HuntingResponse> {
-        return await this.huntingService.hunt(dinoId, zone);
+        return await this.huntingService.hunt(dinoId, zone, weaponKey);
     }
 
     @Post('raid')
