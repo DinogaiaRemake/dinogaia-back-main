@@ -31,6 +31,9 @@ export class CaveService {
         if (!cave) {
             throw new NotFoundException(`Grotte avec l'ID ${id} non trouvée`);
         }
+        // Nettoyer l'inventaire avant de retourner la grotte
+        this.cleanInventory(cave);
+        await this.caveRepository.save(cave);
         return cave;
     }
 
@@ -42,13 +45,39 @@ export class CaveService {
         if (!cave) {
             throw new NotFoundException(`Grotte pour le dino ${dinoId} non trouvée`);
         }
+        // Nettoyer l'inventaire avant de retourner la grotte
+        this.cleanInventory(cave);
+        await this.caveRepository.save(cave);
         return cave;
     }
 
     async update(id: number, updateData: Partial<Cave>): Promise<Cave> {
         const cave = await this.findOne(id);
         Object.assign(cave, updateData);
+        // Nettoyer l'inventaire avant de sauvegarder
+        this.cleanInventory(cave);
         return await this.caveRepository.save(cave);
+    }
+
+    private cleanInventory(cave: Cave): void {
+        // Créer un nouvel objet pour stocker l'inventaire nettoyé
+        const cleanedInventory = {};
+        
+        // Ne copier que les items avec une quantité > 0
+        for (const [key, item] of Object.entries(cave.inventory)) {
+            // Forcer la conversion en nombre
+            const quantity = Number(item.quantity);
+            if (!isNaN(quantity) && quantity > 0) {
+                // S'assurer que la quantité est stockée comme un nombre
+                cleanedInventory[key] = {
+                    ...item,
+                    quantity: quantity
+                };
+            }
+        }
+        
+        // Remplacer l'inventaire par la version nettoyée
+        cave.inventory = cleanedInventory;
     }
 
     async addToInventory(id: number, itemKey: string, quantity: number): Promise<Cave> {
@@ -90,6 +119,9 @@ export class CaveService {
             cave.hygiene = Math.min(100, cave.hygiene + itemConfig.hygieneBonus);
         }
 
+        // Nettoyer l'inventaire avant de sauvegarder
+        this.cleanInventory(cave);
+
         return await this.caveRepository.save(cave);
     }
 
@@ -100,10 +132,8 @@ export class CaveService {
         }
         cave.inventory[itemKey].quantity -= quantity;
 
-        // Si la quantité atteint 0, on peut supprimer l'item de l'inventaire
-        if (cave.inventory[itemKey].quantity === 0) {
-            delete cave.inventory[itemKey];
-        }
+        // Nettoyer l'inventaire avant de sauvegarder
+        this.cleanInventory(cave);
 
         return await this.caveRepository.save(cave);
     }
