@@ -22,7 +22,7 @@ export class DinoService {
         private caveService: CaveService,
     ) {}
 
-    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    @Cron(CronExpression.EVERY_30_MINUTES)
     async updateDinosAtMidnight() {
         console.log('Mise à jour des dinos à minuit...');
         const allDinos = await this.dinoRepository.find({
@@ -32,8 +32,10 @@ export class DinoService {
         for (const dino of allDinos) {
             console.log("dino + cave de : " + dino.name + " " +dino.cave);
             if (!dino.hunger && !dino.thirst) {
+                console.log("dino " + dino.name + " is not hungry or thirsty" + " and height : " + dino.height);
                 dino.height += 1;
-                dino.health += 10;
+                dino.health = Math.min(100, dino.health + 10);
+                console.log("dino " + dino.name + " health : " + dino.health);
             }
 
             if (!dino.cave?.isClean) {
@@ -46,11 +48,12 @@ export class DinoService {
             dino.hunger = true;
             dino.thirst = true;
             dino.canHunt = true;
+            console.log("dino " + dino.name + " can hunt : " + dino.canHunt);
             if (dino.cave) {
                 dino.cave.isClean = false;
             }
-            
-            await this.dinoRepository.save(dino);
+            let savedDino = await this.dinoRepository.save(dino);
+            console.log("dino " + savedDino.name + " saved");
         }
         
         console.log('Mise à jour des dinos terminée !');
