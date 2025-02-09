@@ -34,6 +34,7 @@ export interface HuntingZoneConfig {
     dangers: Danger[];
     maxEvents: number;
     baseEventCount: number;
+    dangerChance: number; // Pourcentage de risque de base pour la zone (ex: 30 pour 30%)
 }
 
 export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
@@ -42,6 +43,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         minLevel: 1,
         baseEventCount: 3,
         maxEvents: 5,
+        dangerChance: 10, //10% de chance de danger
         dangers: [
             { name: 'Attaque de requin', healthDamage: 18, description: 'Se faire attaquer par un requin' },
             { name: 'Attaque de requin blanc', healthDamage: 10, description: 'Se faire attaquer par un requin blanc' },
@@ -71,6 +73,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         minLevel: 2,
         baseEventCount: 4,
         maxEvents: 6,
+        dangerChance: 30, // 30% de chance de danger
         dangers: [
             { name: 'Collision avec un arbre', healthDamage: 18, description: 'Se prendre un arbre' },
             { name: 'Attaque de lézard doré', healthDamage: 0, manaDamage: 30, description: 'Se faire attaquer par un lézard doré' },
@@ -94,6 +97,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         minLevel: 1,
         baseEventCount: 3,
         maxEvents: 5,
+        dangerChance: 35, // 35% de chance de danger
         dangers: [
             { name: 'Attaque d\'aigle', healthDamage: 15, description: 'Se faire attaquer par un aigle' },
             { name: 'Attaque d\'apprenti chaman', healthDamage: 15, manaDamage: 15, description: 'Se faire attaquer par un apprenti chaman' },
@@ -111,6 +115,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         quest: 'iles_ciel',
         baseEventCount: 4,
         maxEvents: 6,
+        dangerChance: 45, // 45% de chance de danger
         dangers: [
             { name: 'Chute dans l\'eau', healthDamage: 13, description: 'Tomber dans l\'eau' },
             { name: 'Aspiration de magie', healthDamage: 0, manaDamage: 20, description: 'Un crapaud doré t\'a aspiré de la magie' },
@@ -128,6 +133,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         quest: 'caverne_dragon',
         baseEventCount: 4,
         maxEvents: 6,
+        dangerChance: 50, // 50% de chance de danger
         dangers: [],
         preys: []
     },
@@ -136,6 +142,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         minLevel: 2,
         baseEventCount: 4,
         maxEvents: 6,
+        dangerChance: 40, // 40% de chance de danger
         dangers: [
             { name: 'Morsure de tigre', healthDamage: 28, description: 'Se faire mordre par un tigre sacré' },
             { name: 'Attaque de rhinocéros', healthDamage: 25, description: 'Se faire attaquer par un Rhinoceros' },
@@ -152,6 +159,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         minLevel: 3,
         baseEventCount: 4,
         maxEvents: 6,
+        dangerChance: 45, // 45% de chance de danger
         dangers: [
             { name: 'Glissade', healthDamage: 16, description: 'Danger : glissade' },
             { name: 'Avalanche', healthDamage: 28, description: 'Danger : tomber dans une avalanche' },
@@ -168,6 +176,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         minLevel: 5,
         baseEventCount: 4,
         maxEvents: 6,
+        dangerChance: 50, // 50% de chance de danger
         dangers: [
             { name: 'Vol', healthDamage: 0, emeraldLoss: 100, description: 'Te faire voler ta bourse en route' },
             { name: 'Charge de bison', healthDamage: 15, description: 'Te faire charger par un bison furax' },
@@ -185,6 +194,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
         quest: 'midworld',
         baseEventCount: 5,
         maxEvents: 7,
+        dangerChance: 55, // 55% de chance de danger
         dangers: [
             { name: 'Atterrissage UFO', healthDamage: 20, description: 'atterrissage très mouvementé de l\'UFO' },
             { name: 'Pillage aliens', healthDamage: 0, emeraldLoss: 100, description: 'se faire piller par des aliens' },

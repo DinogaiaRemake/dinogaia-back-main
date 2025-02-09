@@ -55,7 +55,19 @@ export class HuntingService {
         const events: Array<Prey | Danger> = [];
 
         for (let i = 0; i < eventCount; i++) {
-            const isPreyEvent = Math.random() > 0.3; // 70% de chance d'avoir une proie
+            // Calculer le risque de danger en fonction de la zone et du niveau
+            let dangerChance = zoneConfig.dangerChance / 100; // Convertir le pourcentage en décimal
+            
+            // Réduire le risque de 5% par niveau au-dessus du niveau minimum
+            const levelDifference = dino.level - zoneConfig.minLevel;
+            const reductionPercent = levelDifference * 0.05; // 5% par niveau
+            dangerChance = Math.max(0.05, dangerChance - reductionPercent); // Minimum 5% de chance
+            
+            console.log(`[HUNT] 🎲 Zone ${zone} - Chance de danger de base: ${zoneConfig.dangerChance}%`);
+            console.log(`[HUNT] 📊 Niveau ${dino.level} (min: ${zoneConfig.minLevel}) - Réduction: ${(reductionPercent * 100).toFixed(1)}%`);
+            console.log(`[HUNT] ⚠️ Chance finale de danger: ${(dangerChance * 100).toFixed(1)}%`);
+            
+            const isPreyEvent = Math.random() > dangerChance;
 
             if (isPreyEvent) {
                 const availablePreys = zoneConfig.preys;
