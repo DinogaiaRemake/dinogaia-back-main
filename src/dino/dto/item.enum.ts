@@ -5,7 +5,8 @@ export enum ItemType {
     FOOD = 'food',
     SKILL = 'skill',
     WEAPON = 'weapon',
-    FIGHT_BOOST = 'fight_boost'
+    FIGHT_BOOST = 'fight_boost',
+    QUEST_ITEM = 'quest_item'
 }
 
 export interface ItemConfig {
@@ -41,6 +42,14 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         price: 3,
         description: 'Un poisson commun de la plage',
         weightGain: 1,
+        xpGain: 0
+    },
+    'crabe_royal': {
+        name: 'Crabe Royal',
+        type: ItemType.PREY,
+        price: 200,
+        description: 'Un crabe majestueux aux pinces dorées',
+        weightGain: 2,
         xpGain: 0
     },
     'crabe_dore': {
@@ -479,5 +488,15 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
             minPreys: 1,
             maxPreys: 16
         }
-    }
+    },
+
+    // Items spéciaux des quêtes
+    'ailes_divines': {
+        name: 'Ailes Divines',
+        type: ItemType.QUEST_ITEM,
+        price: 1000,
+        description: 'Des ailes magiques permettant d\'accéder aux îles célestes',
+        weightGain: 0,
+        xpGain: 0
+    },
 }; 

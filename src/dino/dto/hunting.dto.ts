@@ -56,7 +56,7 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'baleine_bleue', rarity: 5, xpGain: 15, weightGain: 5 },
             { name: 'carpe_eau_douce', rarity: 5, xpGain: 5, weightGain: 1 },
             { name: 'crabe_dore', rarity: 10, xpGain: 10, weightGain: 1 },
-            { name: 'poisson_febrile', rarity: 30, xpGain: 10, weightGain: 1 },
+            { name: 'poisson_febrile', rarity: 28, xpGain: 10, weightGain: 1 },
             { name: 'requin_citron', rarity: 8, xpGain: 15, weightGain: 3 },
             { name: 'requin_blanc', rarity: 8, xpGain: 15, weightGain: 3 },
             { name: 'mouette_offensive', rarity: 8, xpGain: 15, weightGain: 3 },
@@ -65,12 +65,13 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'epaulard_joueur', rarity: 5, xpGain: 15, weightGain: 3 },
             { name: 'epaulard_joueur_dore', rarity: 2, xpGain: 15, weightGain: 3 },
             { name: 'dauphin_joueur', rarity: 5, xpGain: 12, weightGain: 2 },
-            { name: 'dauphin_rieur', rarity: 3, xpGain: 15, weightGain: 3 }
+            { name: 'dauphin_rieur', rarity: 3, xpGain: 15, weightGain: 3 },
+            { name: 'crabe_royal', rarity: 2, xpGain: 20, weightGain: 2 }
         ]
     },
     [HuntingZone.JUNGLE]: {
         name: 'La pleine jungle',
-        minLevel: 2,
+        minLevel: 1,
         baseEventCount: 4,
         maxEvents: 6,
         dangerChance: 30, // 30% de chance de danger
@@ -111,11 +112,11 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
     },
     [HuntingZone.SKY_ISLANDS]: {
         name: 'Les îles du ciel',
-        minLevel: 4,
+        minLevel: 1,
         quest: 'iles_ciel',
         baseEventCount: 4,
         maxEvents: 6,
-        dangerChance: 45, // 45% de chance de danger
+        dangerChance: 30, // 45% de chance de danger
         dangers: [
             { name: 'Chute dans l\'eau', healthDamage: 13, description: 'Tomber dans l\'eau' },
             { name: 'Aspiration de magie', healthDamage: 0, manaDamage: 20, description: 'Un crapaud doré t\'a aspiré de la magie' },
