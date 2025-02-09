@@ -23,7 +23,7 @@ export class DinoService {
         private caveService: CaveService,
     ) {}
 
-    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    @Cron(CronExpression.EVERY_DAY_AT_11PM)
     async updateDinosAtMidnight() {
         console.log('Mise à jour des dinos à minuit...');
         const allDinos = await this.dinoRepository.find({

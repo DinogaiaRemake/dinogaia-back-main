@@ -18,6 +18,7 @@ export interface ItemConfig {
     hygieneBonus?: number;
     weightGain?: number;
     xpGain?: number;
+    isLegendary?: boolean;
     skillBonus?: {
         intelligence?: number;
         agility?: number;
@@ -230,6 +231,22 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         price: 120,
         description: 'Un python chasseur',
         weightGain: 2,
+        xpGain: 0
+    },
+    'vipere': {
+        name: 'Vipère',
+        type: ItemType.PREY,
+        price: 45,
+        description: 'Une vipère venimeuse du canyon',
+        weightGain: 1,
+        xpGain: 0
+    },
+    'abeille': {
+        name: 'Abeille',
+        type: ItemType.PREY,
+        price: 15,
+        description: 'Une abeille butineuse du canyon',
+        weightGain: 0,
         xpGain: 0
     },
 
@@ -498,5 +515,48 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         description: 'Des ailes magiques permettant d\'accéder aux îles célestes',
         weightGain: 0,
         xpGain: 0
+    },
+    'cle_doree': {
+        name: 'Clé Dorée',
+        type: ItemType.QUEST_ITEM,
+        price: 500,
+        description: 'Une mystérieuse clé dorée qui semble ouvrir la porte de la caverne du dragon',
+        weightGain: 0,
+        xpGain: 0
+    },
+
+    // Proies de la caverne du dragon
+    'chauve_souris': {
+        name: 'Chauve-souris',
+        type: ItemType.PREY,
+        price: 35,
+        description: 'Une chauve-souris de la caverne',
+        weightGain: 1,
+        xpGain: 5
+    },
+    'salamandre': {
+        name: 'Salamandre',
+        type: ItemType.PREY,
+        price: 85,
+        description: 'Une salamandre des profondeurs',
+        weightGain: 2,
+        xpGain: 12
+    },
+    'rat': {
+        name: 'Rat',
+        type: ItemType.PREY,
+        price: 120,
+        description: 'Un rat des cavernes',
+        weightGain: 3,
+        xpGain: 15
+    },
+    'lezard_ancien': {
+        name: 'Lézard ancien',
+        type: ItemType.PREY,
+        price: 350,
+        description: 'Un lézard ancestral aux écailles brillantes',
+        weightGain: 4,
+        xpGain: 25,
+        isLegendary: true
     },
 }; 

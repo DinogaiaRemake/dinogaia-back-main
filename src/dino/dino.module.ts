@@ -20,10 +20,13 @@ import { DuelController } from './duel.controller';
 import { SkyIslandsQuest } from './quest/sky-islands.entity';
 import { SkyIslandsQuestService } from './quest/sky-islands.service';
 import { SkyIslandsQuestController } from './quest/sky-islands.controller';
+import { DragonCaveQuest } from './quest/dragon-cave.entity';
+import { DragonCaveQuestService } from './quest/dragon-cave.service';
+import { DragonCaveQuestController } from './quest/dragon-cave.controller';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Dino, User, Cave, Duel, SkyIslandsQuest]),
+        TypeOrmModule.forFeature([Dino, User, Cave, Duel, SkyIslandsQuest, DragonCaveQuest]),
         forwardRef(() => UserModule),
         forwardRef(() => DinoModule)
     ],
@@ -34,7 +37,8 @@ import { SkyIslandsQuestController } from './quest/sky-islands.controller';
         JobController,
         ShopController,
         DuelController,
-        SkyIslandsQuestController
+        SkyIslandsQuestController,
+        DragonCaveQuestController
     ],
     providers: [
         DinoService,
@@ -43,7 +47,8 @@ import { SkyIslandsQuestController } from './quest/sky-islands.controller';
         JobService,
         ShopService,
         DuelService,
-        SkyIslandsQuestService
+        SkyIslandsQuestService,
+        DragonCaveQuestService
     ],
     exports: [
         DinoService,
@@ -52,7 +57,8 @@ import { SkyIslandsQuestController } from './quest/sky-islands.controller';
         JobService,
         ShopService,
         DuelService,
-        SkyIslandsQuestService
+        SkyIslandsQuestService,
+        DragonCaveQuestService
     ]
 })
 export class DinoModule {}

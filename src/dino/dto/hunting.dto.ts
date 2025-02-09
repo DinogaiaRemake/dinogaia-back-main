@@ -105,9 +105,22 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
             { name: 'Attaque de chaman', healthDamage: 20, manaDamage: 20, description: 'Se faire attaquer par un chaman' }
         ],
         preys: [
-            { name: 'lezard_dore', rarity: 40, xpGain: 3, weightGain: 2 },
-            { name: 'aigle_mineur', rarity: 35, xpGain: 8, weightGain: 1 },
-            { name: 'python_chasseur', rarity: 25, xpGain: 10, weightGain: 2 }
+            // Proies communes (50%)
+            { name: 'lezard_dore', rarity: 10, xpGain: 3, weightGain: 2 },
+            { name: 'vipere', rarity: 19, xpGain: 8, weightGain: 1 },
+            { name: 'abeille', rarity: 20, xpGain: 1, weightGain: 0 },
+            
+            // Proies peu communes (39%)
+            { name: 'girafe', rarity: 30, xpGain: 15, weightGain: 3 },
+            
+            // Items de compétence (10%)
+            { name: 'heure_ecole', rarity: 3, xpGain: 0, weightGain: 0 },
+            { name: 'trampoline', rarity: 3, xpGain: 0, weightGain: 0 },
+            { name: 'haltere', rarity: 2, xpGain: 0, weightGain: 0 },
+            { name: 'tapis_course', rarity: 2, xpGain: 0, weightGain: 0 },
+
+            // Item légendaire (11%)
+            { name: 'cle_doree', rarity: 11, xpGain: 50, weightGain: 0, isLegendary: true }
         ]
     },
     [HuntingZone.SKY_ISLANDS]: {
@@ -130,13 +143,30 @@ export const HUNTING_ZONES: { [key in HuntingZone]: HuntingZoneConfig } = {
     },
     [HuntingZone.DRAGON_CAVE]: {
         name: 'Caverne du dragon',
-        minLevel: 3,
+        minLevel: 1,
         quest: 'caverne_dragon',
         baseEventCount: 4,
         maxEvents: 6,
         dangerChance: 50, // 50% de chance de danger
-        dangers: [],
-        preys: []
+        dangers: [
+            { name: 'Éboulement', healthDamage: 15, description: 'Des rochers tombent du plafond de la caverne' },
+            { name: 'Morsure de chauve-souris', healthDamage: 10, description: 'Une chauve-souris vous mord' },
+            { name: 'Attaque de lézard venimeux', healthDamage: 12, manaDamage: 15, description: 'Un lézard venimeux vous attaque' },
+            { name: 'Chute dans une crevasse', healthDamage: 20, description: 'Vous glissez dans une crevasse profonde' }
+        ],
+        preys: [
+            // Proies communes (60%)
+            { name: 'lezard_cavernes', rarity: 25, xpGain: 8, weightGain: 1 },
+            { name: 'lezard_dore', rarity: 20, xpGain: 10, weightGain: 2 },
+            { name: 'chauve_souris', rarity: 15, xpGain: 5, weightGain: 1 },
+            
+            // Proies peu communes (30%)
+            { name: 'salamandre', rarity: 15, xpGain: 12, weightGain: 2 },
+            { name: 'rat', rarity: 15, xpGain: 15, weightGain: 3 },
+            
+            // Proies rares (10%)
+            { name: 'lezard_ancien', rarity: 10, xpGain: 25, weightGain: 4, isLegendary: true }
+        ]
     },
     [HuntingZone.SAVANNA]: {
         name: 'La savane',

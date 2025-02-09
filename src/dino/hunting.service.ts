@@ -49,7 +49,7 @@ export class HuntingService {
         return finalCount;
     }
 
-    private selectRandomEvents(dino: any, zone: HuntingZone, weaponKey?: string): Array<Prey | Danger> {
+    private async selectRandomEvents(dino: any, zone: HuntingZone, weaponKey?: string): Promise<Array<Prey | Danger>> {
         const zoneConfig = HUNTING_ZONES[zone];
         const eventCount = this.calculateEventCount(dino, zone, weaponKey);
         const events: Array<Prey | Danger> = [];
@@ -71,7 +71,7 @@ export class HuntingService {
 
             if (isPreyEvent) {
                 const availablePreys = zoneConfig.preys;
-                const prey = this.selectRandomPrey(availablePreys);
+                const prey = await this.selectRandomPrey(availablePreys, dino);
                 events.push(prey);
             } else {
                 const availableDangers = zoneConfig.dangers;
@@ -83,7 +83,7 @@ export class HuntingService {
         return events;
     }
 
-    private selectRandomPrey(preys: Prey[]): Prey {
+    private async selectRandomPrey(preys: Prey[], dino: any): Promise<Prey> {
         // Vérifier que la somme des raretés est égale à 100
         const totalRarity = preys.reduce((sum, prey) => sum + prey.rarity, 0);
         if (Math.abs(totalRarity - 100) > 0.01) {
@@ -100,10 +100,28 @@ export class HuntingService {
         
         let currentThreshold = 0;
         for (const prey of preys) {
+            // Si c'est la clé dorée et que la quête est déjà complétée, on passe à la proie suivante
+            if (prey.name === 'cle_doree' && dino.completedQuests?.includes('caverne_dragon')) {
+                continue;
+            }
+
             currentThreshold += prey.rarity;
             const padding = ' '.repeat(20 - prey.name.length);
             console.log(`${prey.name}${padding}${prey.rarity}% ${this.createProgressBar(currentThreshold)}`);
             if (random <= currentThreshold) {
+                // Si c'est la clé dorée et que la quête est déjà complétée, on donne un lézard doré à la place
+                if (prey.name === 'cle_doree' && dino.completedQuests?.includes('caverne_dragon')) {
+                    console.log('----------------------------------------');
+                    console.log(`🔄 Quête déjà complétée, remplacement de la clé dorée par un lézard doré`);
+                    console.log('----------------------------------------\n');
+                    return {
+                        name: 'lezard_dore',
+                        rarity: prey.rarity,
+                        xpGain: 3,
+                        weightGain: 2
+                    };
+                }
+
                 console.log('----------------------------------------');
                 console.log(`✨ Proie sélectionnée: ${prey.name} (${prey.rarity}%)`);
                 console.log('----------------------------------------\n');
@@ -167,7 +185,7 @@ export class HuntingService {
             throw new NotFoundException(`Quête ${zoneConfig.quest} requise pour accéder à cette zone`);
         }
 
-        const events = this.selectRandomEvents(dino, zone, weaponKey);
+        const events = await this.selectRandomEvents(dino, zone, weaponKey);
         const results: HuntingResult[] = [];
 
         // Traiter chaque événement
