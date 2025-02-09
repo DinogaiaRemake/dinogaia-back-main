@@ -19,6 +19,7 @@ export interface ItemConfig {
     weightGain?: number;
     xpGain?: number;
     isLegendary?: boolean;
+    visibleInShop?: boolean;
     skillBonus?: {
         intelligence?: number;
         agility?: number;
@@ -51,7 +52,8 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         price: 200,
         description: 'Un crabe majestueux aux pinces dorées',
         weightGain: 2,
-        xpGain: 0
+        xpGain: 0,
+        visibleInShop: false
     },
     'crabe_dore': {
         name: 'Crabe doré',
@@ -532,7 +534,8 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         price: 35,
         description: 'Une chauve-souris de la caverne',
         weightGain: 1,
-        xpGain: 5
+        xpGain: 5,
+        visibleInShop: false
     },
     'salamandre': {
         name: 'Salamandre',
@@ -540,7 +543,8 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         price: 85,
         description: 'Une salamandre des profondeurs',
         weightGain: 2,
-        xpGain: 12
+        xpGain: 12,
+        visibleInShop: false
     },
     'rat': {
         name: 'Rat',
@@ -548,7 +552,8 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         price: 120,
         description: 'Un rat des cavernes',
         weightGain: 3,
-        xpGain: 15
+        xpGain: 15,
+        visibleInShop: false
     },
     'lezard_ancien': {
         name: 'Lézard ancien',
@@ -557,6 +562,7 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         description: 'Un lézard ancestral aux écailles brillantes',
         weightGain: 4,
         xpGain: 25,
-        isLegendary: true
+        isLegendary: true,
+        visibleInShop: false
     },
 }; 

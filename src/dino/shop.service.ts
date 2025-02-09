@@ -11,11 +11,16 @@ export class ShopService {
     ) {}
 
     getItemsByType(type: ItemType): ItemConfig[] {
-        return Object.values(ITEMS_CONFIG).filter(item => item.type === type);
+        return Object.values(ITEMS_CONFIG).filter(item => 
+            item.type === type && 
+            (item.visibleInShop === undefined || item.visibleInShop === true)
+        );
     }
 
     getAllItems(): ItemConfig[] {
-        return Object.values(ITEMS_CONFIG);
+        return Object.values(ITEMS_CONFIG).filter(item => 
+            item.visibleInShop === undefined || item.visibleInShop === true
+        );
     }
 
     //buyItem 
