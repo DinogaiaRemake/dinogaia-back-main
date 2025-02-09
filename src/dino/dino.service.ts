@@ -11,6 +11,7 @@ import { Cave } from './cave.entity';
 import { getRandomClanForSpecies } from './dto/clan.enum';
 import { TREX_LEVELS, VELOCIRAPTOR_LEVELS, PTERODACTYLE_LEVELS, MEGALODON_LEVELS, LevelRequirements } from './dto/level-requirements';
 import { Not } from 'typeorm';
+import { Job, JOB_CONFIG } from './dto/job.enum';
 
 @Injectable()
 export class DinoService {
@@ -22,7 +23,7 @@ export class DinoService {
         private caveService: CaveService,
     ) {}
 
-    @Cron(CronExpression.EVERY_30_MINUTES)
+    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
     async updateDinosAtMidnight() {
         console.log('Mise à jour des dinos à minuit...');
         const allDinos = await this.dinoRepository.find({
@@ -31,6 +32,28 @@ export class DinoService {
         
         for (const dino of allDinos) {
             console.log("dino + cave de : " + dino.name + " " +dino.cave);
+            
+            // Mise à jour du salaire
+            const jobConfig = JOB_CONFIG[dino.job];
+            if (jobConfig) {
+                dino.emeralds += jobConfig.salaire;
+                switch (dino.job) {
+                    case Job.GARDE_ROYAL:
+                        const potDeVin = Math.floor(Math.random() * 2) + 1;
+                        dino.emeralds += potDeVin;
+                        break;
+                    case Job.CAPITAINE_GARDE_ROYAL:
+                        const potsDeVin = Math.floor(Math.random() * 6) + 1;
+                        dino.emeralds += potsDeVin;
+                        break;
+                    case Job.POMPIER:
+                        dino.health = Math.min(100, dino.health + 5);
+                        break;
+                }
+                console.log("dino salaire : " + dino.name + " " + dino.emeralds);
+            }
+
+            // Mise à jour des stats
             if (!dino.hunger && !dino.thirst) {
                 console.log("dino " + dino.name + " is not hungry or thirsty" + " and height : " + dino.height);
                 dino.height += 1;
@@ -112,7 +135,8 @@ export class DinoService {
         const dino = this.dinoRepository.create({
             ...createDinoDto,
             clan,
-            user
+            user,
+            emeralds: 100 // Initialisation des émeraudes à 100
         });
 
         const savedDino = await this.dinoRepository.save(dino);
