@@ -27,6 +27,9 @@ export class User {
     @Column({ default: 'user' })
     role: string;
 
+    @Column({ nullable: true })
+    profilePicture: string;
+
     @OneToMany(() => Dino, dino => dino.user)
     dinos: Dino[];
 

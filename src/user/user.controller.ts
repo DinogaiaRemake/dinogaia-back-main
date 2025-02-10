@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Param, Put, UseGuards, UnauthorizedException, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Put, UseGuards, UnauthorizedException, BadRequestException, NotFoundException, ForbiddenException, UseInterceptors, UploadedFile, Res, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { User } from './user.entity';
@@ -7,6 +7,10 @@ import { DinoService } from '../dino/dino.service';
 import { CreateDinoDto } from '../dino/dto/create-dino.dto';
 import { JwtService } from '@nestjs/jwt';
 import { WhitelistService } from './whitelist.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import * as path from 'path';
+import { memoryStorage } from 'multer';
 
 @Controller('users')
 export class UserController {
@@ -89,5 +93,68 @@ export class UserController {
     @UseGuards(AuthGuard)
     async updateUser(@Param('id') id: number, @Body() userData: Partial<User>): Promise<User> {
         return this.userService.update(id, userData);
+    }
+
+    @Post(':id/profile-picture')
+    @UseGuards(AuthGuard)
+    @UseInterceptors(
+        FileInterceptor('file', {
+            storage: memoryStorage(),
+            limits: {
+                fileSize: 5 * 1024 * 1024, // 5MB
+            },
+            fileFilter: (req, file, callback) => {
+                console.log('FileFilter - Fichier reçu:', {
+                    originalname: file?.originalname,
+                    mimetype: file?.mimetype,
+                    fieldname: file?.fieldname
+                });
+                
+                if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+                    return callback(new Error('Seuls les fichiers image sont autorisés!'), false);
+                }
+                if (!file.mimetype.match(/^image\/(jpeg|png|gif)$/)) {
+                    return callback(new Error('Type de fichier non valide'), false);
+                }
+                callback(null, true);
+            },
+        })
+    )
+    async uploadProfilePicture(
+        @Param('id') id: number,
+        @UploadedFile() file: Express.Multer.File
+    ) {
+        console.log('Début de l\'upload - Headers:', {
+            contentType: file?.mimetype,
+            fileName: file?.originalname,
+            fieldName: file?.fieldname,
+            size: file?.size
+        });
+        
+        if (!file) {
+            console.log('Aucun fichier dans la requête');
+            throw new BadRequestException('Aucun fichier n\'a été envoyé');
+        }
+
+        try {
+            const user = await this.userService.updateProfilePicture(id, file);
+            console.log('Upload réussi pour l\'utilisateur:', id);
+            return {
+                message: 'Photo de profil mise à jour avec succès',
+                profilePicture: user.profilePicture
+            };
+        } catch (error) {
+            console.error('Erreur détaillée lors de l\'upload:', error);
+            throw new BadRequestException(error.message);
+        }
+    }
+
+    @Get(':id/profile-picture')
+    async getProfilePicture(
+        @Param('id') id: number,
+        @Res() res: Response
+    ) {
+        const filePath = await this.userService.getProfilePicture(id);
+        return res.sendFile(path.resolve(filePath));
     }
 }
