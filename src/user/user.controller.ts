@@ -101,7 +101,7 @@ export class UserController {
         FileInterceptor('file', {
             storage: memoryStorage(),
             limits: {
-                fileSize: 5 * 1024 * 1024, // 5MB
+                fileSize: 20 * 1024 * 1024, // 2MB
             },
             fileFilter: (req, file, callback) => {
                 console.log('FileFilter - Fichier reçu:', {
