@@ -61,6 +61,12 @@ export class Duel {
     })
     status: DuelStatus;
 
+    @Column({ default: false })
+    isSeenByChallenger: boolean;
+
+    @Column({ default: false })
+    isSeenByOpponent: boolean;
+
     @Column('simple-json')
     challengerMoves: {
         attacks: AttackZone[];

@@ -32,6 +32,8 @@ export class DinoService {
         
         for (const dino of allDinos) {
             console.log("dino + cave de : " + dino.name + " " +dino.cave);
+            dino.dailySentDuels = 0;
+            dino.dailyReceivedDuels = 0;
             
             // Mise à jour du salaire
             const jobConfig = JOB_CONFIG[dino.job];
@@ -318,7 +320,8 @@ export class DinoService {
     ): Promise<{ dinos: Dino[], total: number }> {
         const [dinos, total] = await this.dinoRepository.findAndCount({
             where: {
-                userId: Not(userId)
+                userId: Not(userId),
+                dailyReceivedDuels: Not(10) // Exclure les dinos qui ont déjà reçu 10 duels
             },
             order: {
                 lastAction: 'DESC'

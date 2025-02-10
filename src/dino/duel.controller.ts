@@ -37,6 +37,15 @@ export class DuelController {
         return await this.duelService.rejectDuel(duelId, dinoId, req.user.id);
     }
 
+    @Post(':dinoId/duels/:duelId/cancel')
+    async cancelDuel(
+        @Request() req,
+        @Param('dinoId', ParseIntPipe) dinoId: number,
+        @Param('duelId', ParseIntPipe) duelId: number
+    ) {
+        return await this.duelService.cancelDuel(duelId, dinoId, req.user.id);
+    }
+
     @Get(':dinoId/sent')
     async getPendingSentDuels(
         @Request() req,
@@ -59,5 +68,30 @@ export class DuelController {
         @Param('dinoId', ParseIntPipe) dinoId: number
     ) {
         return await this.duelService.getDuelHistory(dinoId, req.user.id);
+    }
+
+    @Get(':dinoId/unseen')
+    async getUnseenDuelsCount(
+        @Request() req,
+        @Param('dinoId', ParseIntPipe) dinoId: number
+    ) {
+        return await this.duelService.getUnseenDuelsCount(dinoId, req.user.id);
+    }
+
+    @Post(':dinoId/mark-seen')
+    async markDuelsAsSeen(
+        @Request() req,
+        @Param('dinoId', ParseIntPipe) dinoId: number
+    ) {
+        await this.duelService.markDuelsAsSeen(dinoId, req.user.id);
+        return { message: 'Tous les duels ont été marqués comme lus' };
+    }
+
+    @Get(':dinoId/daily-counters')
+    async getDailyDuelCounters(
+        @Request() req,
+        @Param('dinoId', ParseIntPipe) dinoId: number
+    ) {
+        return await this.duelService.getDailyDuelCounters(dinoId, req.user.id);
     }
 } 

@@ -90,4 +90,10 @@ export class Dino {
 
     @Column({ default: true })
     canHunt: boolean;
+
+    @Column({ default: 0 })
+    dailySentDuels: number;
+
+    @Column({ default: 0 })
+    dailyReceivedDuels: number;
 } 
