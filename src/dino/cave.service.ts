@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cave } from './cave.entity';
 import { ITEMS_CONFIG, ItemType, ItemConfig } from './dto/item.enum';
 import { DinoService } from './dino.service';
 import { TREX_LEVELS, VELOCIRAPTOR_LEVELS, PTERODACTYLE_LEVELS, MEGALODON_LEVELS, LevelRequirements } from './dto/level-requirements';
+import { Dino } from './dino.entity';
 
 @Injectable()
 export class CaveService {
@@ -12,7 +13,9 @@ export class CaveService {
         @InjectRepository(Cave)
         private caveRepository: Repository<Cave>,
         @Inject(forwardRef(() => DinoService))
-        private dinoService: DinoService
+        private dinoService: DinoService,
+        @InjectRepository(Dino)
+        private dinoRepository: Repository<Dino>
     ) {}
 
     async create(dinoId: number): Promise<Cave> {
@@ -168,59 +171,77 @@ export class CaveService {
             throw new BadRequestException(`Pas assez de ${itemConfig.name} dans l'inventaire`);
         }
 
-        if (itemConfig.type !== ItemType.SKILL) {
-            throw new BadRequestException(`Cet item n'est pas un boost de compétences`);
-        }
-
-        if (!itemConfig.skillBonus) {
-            throw new BadRequestException(`Ce livre n'a pas de bonus de compétence configuré`);
-        }
-
-        // Appliquer les bonus de compétences au dinosaure
-        const dino = cave.dino;
         let message = `${quantity}x ${itemConfig.name} utilisé(s). `;
 
-        // Récupérer les requirements une seule fois
-        const requirements = await this.dinoService.getLevelRequirements(dino.species, dino.level + 1);
-        
-        // Vérifier si l'utilisation dépasserait les limites
-        if (itemConfig.skillBonus.intelligence && 
-            dino.intelligence + itemConfig.skillBonus.intelligence * quantity > requirements.maxIntelligence) {
-            throw new BadRequestException(`L'utilisation dépasserait la limite d'intelligence de ${requirements.maxIntelligence}`);
-        }
-        if (itemConfig.skillBonus.agility && 
-            dino.agility + itemConfig.skillBonus.agility * quantity > requirements.maxAgility) {
-            throw new BadRequestException(`L'utilisation dépasserait la limite d'agilité de ${requirements.maxAgility}`);
-        }
-        if (itemConfig.skillBonus.strength && 
-            dino.strength + itemConfig.skillBonus.strength * quantity > requirements.maxForce) {
-            throw new BadRequestException(`L'utilisation dépasserait la limite de force de ${requirements.maxForce}`);
-        }
-        if (itemConfig.skillBonus.endurance && 
-            dino.endurance + itemConfig.skillBonus.endurance * quantity > requirements.maxEndurance) {
-            throw new BadRequestException(`L'utilisation dépasserait la limite d'endurance de ${requirements.maxEndurance}`);
-        }
+        if (itemConfig.type === ItemType.HEALING || (itemConfig.type === ItemType.PREY && itemConfig.healingPower)) {
+            // Gestion des items de soin
+            if (itemConfig.healingPower) {
+                cave.dino.health = Math.min(100, cave.dino.health + itemConfig.healingPower * quantity);
+                message += `PV restaurés: +${itemConfig.healingPower * quantity}. `;
+            }
 
-        // Si on arrive ici, on peut appliquer les bonus
-        if (itemConfig.skillBonus.intelligence) {
-            dino.intelligence += itemConfig.skillBonus.intelligence * quantity;
-            message += `Intelligence +${itemConfig.skillBonus.intelligence * quantity}. `;
-        }
-        if (itemConfig.skillBonus.agility) {
-            dino.agility += itemConfig.skillBonus.agility * quantity;
-            message += `Agilité +${itemConfig.skillBonus.agility * quantity}. `;
-        }
-        if (itemConfig.skillBonus.strength) {
-            dino.strength += itemConfig.skillBonus.strength * quantity;
-            message += `Force +${itemConfig.skillBonus.strength * quantity}. `;
-        }
-        if (itemConfig.skillBonus.endurance) {
-            dino.endurance += itemConfig.skillBonus.endurance * quantity;
-            message += `Endurance +${itemConfig.skillBonus.endurance * quantity}. `;
-        }
+            // Si l'item peut soigner une maladie spécifique
+            if (itemConfig.cureDisease && cave.dino.disease === itemConfig.cureDisease) {
+                cave.dino.disease = null;
+                cave.dino.diseaseStartDate = null;
+                message += `La maladie a été soignée. `;
+            } else if (itemConfig.cureDisease && cave.dino.disease !== itemConfig.cureDisease) {
+                throw new BadRequestException(`Ce médicament ne peut pas soigner la maladie actuelle du dinosaure`);
+            }
 
-        // Sauvegarder les changements du dinosaure
-        await this.dinoService.update(dino.id, dino);
+            // Sauvegarder les changements du dinosaure
+            await this.dinoRepository.save(cave.dino);
+        } else if (itemConfig.type === ItemType.PREY) {
+            // Si c'est une proie sans healingPower, on la traite comme avant
+            cave.dino.hunger = false;
+            cave.dino.weight += Number(itemConfig.weightGain) * quantity;
+            await this.dinoService.update(cave.dino.id, cave.dino);
+        } else if (itemConfig.type === ItemType.SKILL) {
+            // Code existant pour les items de compétence
+            if (!itemConfig.skillBonus) {
+                throw new BadRequestException(`Cet item n'a pas de bonus de compétence configuré`);
+            }
+
+            const requirements = await this.dinoService.getLevelRequirements(cave.dino.species, cave.dino.level + 1);
+            
+            if (itemConfig.skillBonus.intelligence && 
+                cave.dino.intelligence + itemConfig.skillBonus.intelligence * quantity > requirements.maxIntelligence) {
+                throw new BadRequestException(`L'utilisation dépasserait la limite d'intelligence de ${requirements.maxIntelligence}`);
+            }
+            if (itemConfig.skillBonus.agility && 
+                cave.dino.agility + itemConfig.skillBonus.agility * quantity > requirements.maxAgility) {
+                throw new BadRequestException(`L'utilisation dépasserait la limite d'agilité de ${requirements.maxAgility}`);
+            }
+            if (itemConfig.skillBonus.strength && 
+                cave.dino.strength + itemConfig.skillBonus.strength * quantity > requirements.maxForce) {
+                throw new BadRequestException(`L'utilisation dépasserait la limite de force de ${requirements.maxForce}`);
+            }
+            if (itemConfig.skillBonus.endurance && 
+                cave.dino.endurance + itemConfig.skillBonus.endurance * quantity > requirements.maxEndurance) {
+                throw new BadRequestException(`L'utilisation dépasserait la limite d'endurance de ${requirements.maxEndurance}`);
+            }
+
+            if (itemConfig.skillBonus.intelligence) {
+                cave.dino.intelligence += itemConfig.skillBonus.intelligence * quantity;
+                message += `Intelligence +${itemConfig.skillBonus.intelligence * quantity}. `;
+            }
+            if (itemConfig.skillBonus.agility) {
+                cave.dino.agility += itemConfig.skillBonus.agility * quantity;
+                message += `Agilité +${itemConfig.skillBonus.agility * quantity}. `;
+            }
+            if (itemConfig.skillBonus.strength) {
+                cave.dino.strength += itemConfig.skillBonus.strength * quantity;
+                message += `Force +${itemConfig.skillBonus.strength * quantity}. `;
+            }
+            if (itemConfig.skillBonus.endurance) {
+                cave.dino.endurance += itemConfig.skillBonus.endurance * quantity;
+                message += `Endurance +${itemConfig.skillBonus.endurance * quantity}. `;
+            }
+
+            await this.dinoService.update(cave.dino.id, cave.dino);
+        } else {
+            throw new BadRequestException(`Cet item ne peut pas être utilisé directement`);
+        }
 
         // Retirer les items utilisés de l'inventaire
         await this.removeFromInventory(id, itemKey, quantity);
@@ -229,5 +250,32 @@ export class CaveService {
             message,
             cave: await this.findOne(id)
         };
+    }
+
+    async cleanCave(caveId: number, userId: number): Promise<Cave> {
+        const cave = await this.caveRepository.findOne({
+            where: { id: caveId },
+            relations: ['dino', 'dino.user']
+        });
+
+        if (!cave) {
+            throw new NotFoundException('Grotte non trouvée');
+        }
+
+        if (cave.dino.user.id !== userId) {
+            throw new ForbiddenException('Cette grotte ne vous appartient pas');
+        }
+
+        if (cave.isClean) {
+            throw new ForbiddenException('La grotte est déjà propre');
+        }
+
+        // Coût du nettoyage en émeraudes
+        cave.isClean = true;
+
+        // Sauvegarder le dinosaure avec les émeraudes mises à jour
+        await this.dinoRepository.save(cave.dino);
+
+        return await this.caveRepository.save(cave);
     }
 } 

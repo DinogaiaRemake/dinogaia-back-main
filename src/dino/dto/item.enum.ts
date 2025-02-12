@@ -6,7 +6,8 @@ export enum ItemType {
     SKILL = 'skill',
     WEAPON = 'weapon',
     FIGHT_BOOST = 'fight_boost',
-    QUEST_ITEM = 'quest_item'
+    QUEST_ITEM = 'quest_item',
+    HEALING = 'healing'
 }
 
 export interface ItemConfig {
@@ -34,6 +35,8 @@ export interface ItemConfig {
         health: number;
         mana: number;
     };
+    healingPower?: number;
+    cureDisease?: string;
 }
 
 export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
@@ -157,9 +160,10 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         name: 'Lézard doré',
         type: ItemType.PREY,
         price: 30,
-        description: 'Un lézard à la peau dorée',
+        description: 'Un lézard à la peau dorée aux propriétés curatives. Restaure 30 points de vie.',
         weightGain: 2,
-        xpGain: 0
+        xpGain: 0,
+        healingPower: 30
     },
     'hibou_hurleur': {
         name: 'Hibou hurleur',
@@ -565,4 +569,55 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         isLegendary: true,
         visibleInShop: false
     },
+
+    // Items de soin généraux
+    'herbes_medicinales': {
+        name: 'Herbes Médicinales',
+        description: 'Un mélange d\'herbes qui restaure 15 points de vie.',
+        type: ItemType.HEALING,
+        price: 10,
+        healingPower: 15
+    },
+
+    // Médicaments spécifiques
+    'sirop_anti_grippe': {
+        name: 'Sirop Anti-Grippe',
+        type: ItemType.HEALING,
+        description: 'Un sirop efficace contre la grippe. Restaure 20 points de vie.',
+        price: 15,
+        healingPower: 20,
+        cureDisease: 'grippe'
+    },
+    'anti_parasitaire': {
+        name: 'Anti-Parasitaire',
+        type: ItemType.HEALING,
+        description: 'Un traitement puissant contre les parasites. Restaure 15 points de vie.',
+        price: 20,
+        healingPower: 15,
+        cureDisease: 'parasites'
+    },
+    'antibiotiques': {
+        name: 'Antibiotiques',
+        type: ItemType.HEALING,
+        description: 'Un traitement contre les infections graves. Restaure 25 points de vie.',
+        price: 30,
+        healingPower: 25,
+        cureDisease: 'infection'
+    },
+    'bandages_speciaux': {
+        name: 'Bandages Spéciaux',
+        type: ItemType.HEALING,
+        description: 'Des bandages qui aident à guérir les fractures. Restaure 10 points de vie.',
+        price: 25,
+        healingPower: 10,
+        cureDisease: 'fracture'
+    },
+    'antidote': {
+        name: 'Antidote',
+        type: ItemType.HEALING,
+        description: 'Un puissant antidote contre l\'empoisonnement. Restaure 30 points de vie.',
+        price: 35,
+        healingPower: 30,
+        cureDisease: 'empoisonnement'
+    }
 }; 

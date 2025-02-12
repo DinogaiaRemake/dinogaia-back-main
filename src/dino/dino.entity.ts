@@ -3,6 +3,7 @@ import { User } from '../user/user.entity';
 import { DinoSpecies } from './dto/create-dino.dto';
 import { Cave } from './cave.entity';
 import { Job } from './dto/job.enum';
+import { Disease } from './dto/disease.enum';
 
 @Entity()
 export class Dino {
@@ -96,4 +97,10 @@ export class Dino {
 
     @Column({ default: 0 })
     dailyReceivedDuels: number;
+
+    @Column({ type: 'enum', enum: Disease, nullable: true })
+    disease: Disease | null;
+
+    @Column({ type: 'timestamp', nullable: true })
+    diseaseStartDate: Date | null;
 } 

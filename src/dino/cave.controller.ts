@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, UseGuards, ParseIntPipe, Get } from '@nestjs/common';
+import { Controller, Post, Body, Param, UseGuards, ParseIntPipe, Get, Request } from '@nestjs/common';
 import { CaveService } from './cave.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { Type } from 'class-transformer';
@@ -61,5 +61,18 @@ export class CaveController {
     @Get('items')
     async getAvailableItems() {
         return ITEMS_CONFIG;
+    }
+
+    @Post(':id/clean')
+    @UseGuards(AuthGuard)
+    async cleanCave(
+        @Request() req,
+        @Param('id', ParseIntPipe) id: number
+    ) {
+        const cave = await this.caveService.cleanCave(id, req.user.id);
+        return {
+            message: 'La grotte a été nettoyée avec succès',
+            cave
+        };
     }
 } 

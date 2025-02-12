@@ -1,5 +1,5 @@
 // TODO: Implement DinoService
-import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, forwardRef, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Dino } from './dino.entity';
@@ -12,6 +12,8 @@ import { getRandomClanForSpecies } from './dto/clan.enum';
 import { TREX_LEVELS, VELOCIRAPTOR_LEVELS, PTERODACTYLE_LEVELS, MEGALODON_LEVELS, LevelRequirements } from './dto/level-requirements';
 import { Not } from 'typeorm';
 import { Job, JOB_CONFIG } from './dto/job.enum';
+import { Disease, DISEASE_CONFIG, DiseaseConfig } from './dto/disease.enum';
+import { ITEMS_CONFIG } from './dto/item.enum';
 
 @Injectable()
 export class DinoService {
@@ -63,10 +65,21 @@ export class DinoService {
                 console.log("dino " + dino.name + " health : " + dino.health);
             }
 
-            if (!dino.cave?.isClean) {
+            // Gestion des maladies
+            if (dino.disease) {
+                const diseaseConfig = DISEASE_CONFIG[dino.disease];
+                dino.health = Math.max(0, dino.health - diseaseConfig.dailyDamage);
+                console.log(`${dino.name} a perdu ${diseaseConfig.dailyDamage} points de vie à cause de ${diseaseConfig.name}`);
+            }
+
+            // Chance de tomber malade si la grotte est sale
+            if (!dino.cave?.isClean && !dino.disease) {
                 const random = Math.random();
-                if (random < 0.1) {
-                    // TODO: Dino is sick
+                if (random < 0.1) { // 10% de chance de tomber malade
+                    const diseases = Object.values(Disease);
+                    dino.disease = diseases[Math.floor(Math.random() * diseases.length)];
+                    dino.diseaseStartDate = new Date();
+                    console.log(`${dino.name} est tombé malade : ${dino.disease}`);
                 }
             }
 
@@ -220,8 +233,16 @@ export class DinoService {
             throw new NotFoundException(`${food} non trouvé dans la grotte du dino ${id}`);
         }
 
+        const itemConfig = ITEMS_CONFIG[food];
+        
         dino.hunger = false;
         dino.weight += Number(cave.inventory[food].weightGain);
+        
+        // Appliquer le soin si la proie a une propriété healingPower
+        if (itemConfig.healingPower) {
+            dino.health = Math.min(100, dino.health + itemConfig.healingPower);
+        }
+        
         //Gain xp but limit to the max of the level (should be replace as max xp is fight dependent not feed)
         dino.experience = Math.min((await this.getLevelRequirements(dino.species, dino.level + 1)).maxExperience, dino.experience+Number(cave.inventory[food].xpGain));
         cave.inventory[food].quantity = Number(cave.inventory[food].quantity) - 1;
@@ -332,5 +353,36 @@ export class DinoService {
         });
 
         return { dinos, total };
+    }
+
+    // Nouvelle méthode pour soigner un dinosaure
+    async treatDisease(id: number): Promise<Dino> {
+        const dino = await this.findOne(id);
+        
+        if (!dino.disease) {
+            throw new NotFoundException('Ce dinosaure n\'est pas malade');
+        }
+
+        const diseaseConfig = DISEASE_CONFIG[dino.disease];
+
+        dino.disease = null;
+        dino.diseaseStartDate = null;
+        
+        // Mettre à jour la dernière action
+        dino.lastAction = new Date();
+        dino.isActive = true;
+
+        return await this.dinoRepository.save(dino);
+    }
+
+    // Nouvelle méthode pour obtenir les informations sur la maladie actuelle
+    async getDiseaseInfo(id: number): Promise<DiseaseConfig | null> {
+        const dino = await this.findOne(id);
+        
+        if (!dino.disease) {
+            return null;
+        }
+
+        return DISEASE_CONFIG[dino.disease];
     }
 }

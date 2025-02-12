@@ -5,6 +5,7 @@ import { Duel, DuelStatus, AttackZone, DuelResult, DuelRound } from './duel.enti
 import { Dino } from './dino.entity';
 import { CreateDuelDto } from './dto/create-duel.dto';
 import { Brackets } from 'typeorm';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class DuelService {
@@ -14,6 +15,17 @@ export class DuelService {
         @InjectRepository(Dino)
         private dinoRepository: Repository<Dino>,
     ) {}
+
+    @Cron(CronExpression.EVERY_DAY_AT_11PM)
+    async cleanupDuelsAtMidnight() {
+        console.log('Suppression de tous les duels à minuit...');
+        try {
+            await this.duelRepository.clear();
+            console.log('Tous les duels ont été supprimés avec succès');
+        } catch (error) {
+            console.error('Erreur lors de la suppression des duels:', error);
+        }
+    }
 
     private async verifyDinoOwnership(dinoId: number, userId: number): Promise<Dino> {
         const dino = await this.dinoRepository.findOne({ 

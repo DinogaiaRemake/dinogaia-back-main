@@ -6,6 +6,8 @@ import { UpdateDinoDto } from './dto/update-dino.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Cave } from './cave.entity';
 import { ForbiddenException } from '@nestjs/common';
+import { DiseaseConfig } from './dto/disease.enum';
+
 @Controller('dinos')
 export class DinoController {
     constructor(private readonly dinoService: DinoService) {}
@@ -172,5 +174,27 @@ export class DinoController {
             throw new ForbiddenException('Vous n\'êtes pas le propriétaire de ce dinosaure');
         }
         return await this.dinoService.levelUp(id);
+    }
+
+    @Post(':id/treat-disease')
+    @UseGuards(AuthGuard)
+    async treatDisease(
+        @Request() req,
+        @Param('id', ParseIntPipe) id: number
+    ) {
+        const dino = await this.dinoService.treatDisease(id);
+        return {
+            message: 'Votre dinosaure a été soigné avec succès',
+            dino
+        };
+    }
+
+    @Get(':id/disease')
+    @UseGuards(AuthGuard)
+    async getDiseaseInfo(
+        @Param('id', ParseIntPipe) id: number
+    ): Promise<{ disease: DiseaseConfig | null }> {
+        const diseaseInfo = await this.dinoService.getDiseaseInfo(id);
+        return { disease: diseaseInfo };
     }
 }
