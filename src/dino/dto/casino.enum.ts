@@ -69,38 +69,38 @@ export const SLOT_MACHINES: { [key: string]: SlotMachineConfig } = {
 export const SCRATCH_TICKETS: { [key: string]: ScratchTicketConfig } = {
     'ticket_basique': {
         name: 'Ticket à Gratter Basique',
-        cost: 3,
+        cost: 5,
         symbols: ['étoile', 'pièce', 'diamant', 'trèfle', 'coeur'],
         prizes: [
             { 
                 combination: ['étoile', 'étoile', 'pièce'],
                 emeralds: 1,
-                chance: 20 // Gain très fréquent
+                chance: 15 // 0.15 emeralds
             },
             { 
                 combination: ['pièce', 'diamant', 'pièce'],
                 emeralds: 5,
-                chance: 15
+                chance: 8 // 0.4 emeralds
             },
             { 
                 combination: ['diamant', 'coeur', 'diamant'],
                 emeralds: 10,
-                chance: 10
+                chance: 5 // 0.5 emeralds
             },
             {
                 combination: ['trèfle', 'trèfle', 'diamant'],
                 emeralds: 15,
-                chance: 8
+                chance: 3 // 0.45 emeralds
             },
             {
                 combination: ['coeur', 'étoile', 'coeur'],
                 emeralds: 250,
-                chance: 5
+                chance: 0.5 // 1.25 emeralds
             },
             {
                 combination: ['diamant', 'diamant', 'diamant'],
                 emeralds: 500,
-                chance: 3
+                chance: 0.1 // 0.5 emeralds
             }
         ]
     }
