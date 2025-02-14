@@ -23,6 +23,8 @@ import { SkyIslandsQuestController } from './quest/sky-islands.controller';
 import { DragonCaveQuest } from './quest/dragon-cave.entity';
 import { DragonCaveQuestService } from './quest/dragon-cave.service';
 import { DragonCaveQuestController } from './quest/dragon-cave.controller';
+import { CasinoService } from './casino.service';
+import { CasinoController } from './casino.controller';
 
 @Module({
     imports: [
@@ -38,7 +40,8 @@ import { DragonCaveQuestController } from './quest/dragon-cave.controller';
         ShopController,
         DuelController,
         SkyIslandsQuestController,
-        DragonCaveQuestController
+        DragonCaveQuestController,
+        CasinoController
     ],
     providers: [
         DinoService,
@@ -48,7 +51,8 @@ import { DragonCaveQuestController } from './quest/dragon-cave.controller';
         ShopService,
         DuelService,
         SkyIslandsQuestService,
-        DragonCaveQuestService
+        DragonCaveQuestService,
+        CasinoService
     ],
     exports: [
         DinoService,
@@ -58,7 +62,8 @@ import { DragonCaveQuestController } from './quest/dragon-cave.controller';
         ShopService,
         DuelService,
         SkyIslandsQuestService,
-        DragonCaveQuestService
+        DragonCaveQuestService,
+        CasinoService
     ]
 })
 export class DinoModule {}

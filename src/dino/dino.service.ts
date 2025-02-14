@@ -87,9 +87,14 @@ export class DinoService {
             dino.thirst = true;
             dino.canHunt = true;
             console.log("dino " + dino.name + " can hunt : " + dino.canHunt);
+
+            // Mettre à jour et sauvegarder la grotte
             if (dino.cave) {
                 dino.cave.isClean = false;
+                await this.caveService.update(dino.cave.id, dino.cave);
+                console.log(`La grotte de ${dino.name} a été mise à jour - isClean: false`);
             }
+
             let savedDino = await this.dinoRepository.save(dino);
             console.log("dino " + savedDino.name + " saved");
         }
