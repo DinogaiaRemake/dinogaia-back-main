@@ -25,10 +25,13 @@ import { DragonCaveQuestService } from './quest/dragon-cave.service';
 import { DragonCaveQuestController } from './quest/dragon-cave.controller';
 import { CasinoService } from './casino.service';
 import { CasinoController } from './casino.controller';
+import { MarketService } from './market.service';
+import { MarketController } from './market.controller';
+import { MarketListing } from './market-listing.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Dino, User, Cave, Duel, SkyIslandsQuest, DragonCaveQuest]),
+        TypeOrmModule.forFeature([Dino, User, Cave, Duel, SkyIslandsQuest, DragonCaveQuest, MarketListing]),
         forwardRef(() => UserModule),
         forwardRef(() => DinoModule)
     ],
@@ -41,7 +44,8 @@ import { CasinoController } from './casino.controller';
         DuelController,
         SkyIslandsQuestController,
         DragonCaveQuestController,
-        CasinoController
+        CasinoController,
+        MarketController
     ],
     providers: [
         DinoService,
@@ -52,7 +56,8 @@ import { CasinoController } from './casino.controller';
         DuelService,
         SkyIslandsQuestService,
         DragonCaveQuestService,
-        CasinoService
+        CasinoService,
+        MarketService
     ],
     exports: [
         DinoService,
@@ -63,7 +68,8 @@ import { CasinoController } from './casino.controller';
         DuelService,
         SkyIslandsQuestService,
         DragonCaveQuestService,
-        CasinoService
+        CasinoService,
+        MarketService
     ]
 })
 export class DinoModule {}
