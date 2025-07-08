@@ -48,6 +48,17 @@ export class MarketService {
             throw new BadRequestException('Le prix doit être supérieur à 0');
         }
 
+        // Vérifier que le prix est dans la fourchette ±20% du prix de base
+        const basePrice = itemConfig.price;
+        const minPrice = Math.floor(basePrice * 0.8);
+        const maxPrice = Math.ceil(basePrice * 1.2);
+
+        if (pricePerUnit < minPrice || pricePerUnit > maxPrice) {
+            throw new BadRequestException(
+                `Le prix doit être compris entre ${minPrice} et ${maxPrice} émeraudes (±20% du prix de base de ${basePrice})`
+            );
+        }
+
         // Retirer les items de l'inventaire
         await this.caveService.removeFromInventory(cave.id, itemKey, quantity);
 

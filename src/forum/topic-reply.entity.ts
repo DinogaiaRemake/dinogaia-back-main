@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { User } from '../user/user.entity';
 import { Topic } from './topic.entity';
 
@@ -9,6 +9,21 @@ export class TopicReply {
 
   @Column('text')
   content: string;
+
+  // Relation vers une réponse parente (permet les threads)
+  @ManyToOne(() => TopicReply, (reply: TopicReply) => reply.children, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  parentReply?: TopicReply;
+
+  // Réponses enfants d’une réponse (threading)
+  @OneToMany(() => TopicReply, (reply: TopicReply) => reply.parentReply)
+  children?: TopicReply[];
+
+  // Pièces jointes (ex: URLs d’images) encodées sous forme de tableau JSON simple
+  @Column({ type: 'simple-json', nullable: true })
+  attachments?: string[];
 
   @ManyToOne(() => User, user => user.topicReplies)
   author: User;

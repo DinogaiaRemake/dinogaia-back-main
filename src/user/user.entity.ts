@@ -23,7 +23,7 @@ export class User {
     @IsNotEmpty()
     name: string;
     
-    //role
+    // Rôles possibles : 'admin' | 'moderator' | 'user'
     @Column({ default: 'user' })
     role: string;
 

@@ -71,10 +71,12 @@ export class CaveService {
             // Forcer la conversion en nombre
             const quantity = Number(item.quantity);
             if (!isNaN(quantity) && quantity > 0) {
-                // S'assurer que la quantité est stockée comme un nombre
+                const itemConfig = ITEMS_CONFIG[key];
+
                 cleanedInventory[key] = {
                     ...item,
-                    quantity: quantity
+                    quantity: quantity,
+                    description: itemConfig?.description || ''
                 };
             }
         }

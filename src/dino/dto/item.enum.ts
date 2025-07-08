@@ -530,6 +530,15 @@ export const ITEMS_CONFIG: { [key: string]: ItemConfig } = {
         weightGain: 0,
         xpGain: 0
     },
+    'ufo': {
+        name: 'UFO',
+        type: ItemType.QUEST_ITEM,
+        price: 0,
+        description: 'Cette machine semble avoir la capacité de voler à travers ciel, pourrions nous voguer vers d\'autres horizons ?',
+        weightGain: 0,
+        xpGain: 0,
+        visibleInShop: false
+    },
 
     // Proies de la caverne du dragon
     'chauve_souris': {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request, Query, Delete } from '@nestjs/common';
 import { ForumService } from './forum.service';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
@@ -44,6 +44,20 @@ export class ForumController {
   @UseGuards(AuthGuard)
   async likeReply(@Param('id') id: number) {
     return this.forumService.likeReply(id);
+  }
+
+  // Suppression d’un topic (admin ou auteur)
+  @Delete('topics/:id')
+  @UseGuards(AuthGuard)
+  async deleteTopic(@Param('id') id: number, @Request() req) {
+    return this.forumService.deleteTopic(+id, req.user as any);
+  }
+
+  // Suppression d’une réponse
+  @Delete('replies/:id')
+  @UseGuards(AuthGuard)
+  async deleteReply(@Param('id') id: number, @Request() req) {
+    return this.forumService.deleteReply(+id, req.user as any);
   }
 
   @Get('search')

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Param, Put, UseGuards, UnauthorizedException, BadRequestException, NotFoundException, ForbiddenException, UseInterceptors, UploadedFile, Res, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Put, UseGuards, UnauthorizedException, BadRequestException, NotFoundException, ForbiddenException, UseInterceptors, UploadedFile, Res, Request } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { User } from './user.entity';
@@ -93,6 +93,36 @@ export class UserController {
     @UseGuards(AuthGuard)
     async updateUser(@Param('id') id: number, @Body() userData: Partial<User>): Promise<User> {
         return this.userService.update(id, userData);
+    }
+
+    // Changer le rôle d’un utilisateur (admin uniquement)
+    @Put(':id/role')
+    @UseGuards(AuthGuard)
+    async updateUserRole(
+        @Param('id') id: number,
+        @Body('role') role: string,
+        @Request() req,
+    ): Promise<User> {
+        const requester = await this.userService.findOne({ id: req.user.id });
+
+        if (requester.role === 'admin') {
+            // Admin peut tout faire
+            return this.userService.updateRole(+id, role);
+        }
+
+        if (requester.role === 'moderator') {
+            // Modérateur ne peut que bannir les utilisateurs simples
+            if (role !== 'banned') {
+                throw new ForbiddenException('Les modérateurs ne peuvent que bannir');
+            }
+            const target = await this.userService.findOne({ id: +id });
+            if (target.role !== 'user') {
+                throw new ForbiddenException('Impossible de bannir cet utilisateur');
+            }
+            return this.userService.updateRole(+id, 'banned');
+        }
+
+        throw new ForbiddenException('Action non autorisée');
     }
 
     @Post(':id/profile-picture')

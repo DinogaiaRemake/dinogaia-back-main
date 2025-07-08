@@ -176,4 +176,13 @@ export class UserService {
         }
         return user.profilePicture;
     }
+
+    async updateRole(userId: number, newRole: string): Promise<User> {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+        user.role = newRole;
+        return this.userRepository.save(user);
+    }
 } 

@@ -28,10 +28,13 @@ import { CasinoController } from './casino.controller';
 import { MarketService } from './market.service';
 import { MarketController } from './market.controller';
 import { MarketListing } from './market-listing.entity';
+import { KoyoQuest } from './quest/koyo.entity';
+import { KoyoQuestService } from './quest/koyo.service';
+import { KoyoQuestController } from './quest/koyo.controller';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Dino, User, Cave, Duel, SkyIslandsQuest, DragonCaveQuest, MarketListing]),
+        TypeOrmModule.forFeature([Dino, User, Cave, Duel, SkyIslandsQuest, DragonCaveQuest, MarketListing, KoyoQuest]),
         forwardRef(() => UserModule),
         forwardRef(() => DinoModule)
     ],
@@ -44,6 +47,7 @@ import { MarketListing } from './market-listing.entity';
         DuelController,
         SkyIslandsQuestController,
         DragonCaveQuestController,
+        KoyoQuestController,
         CasinoController,
         MarketController
     ],
@@ -56,6 +60,7 @@ import { MarketListing } from './market-listing.entity';
         DuelService,
         SkyIslandsQuestService,
         DragonCaveQuestService,
+        KoyoQuestService,
         CasinoService,
         MarketService
     ],
@@ -68,6 +73,7 @@ import { MarketListing } from './market-listing.entity';
         DuelService,
         SkyIslandsQuestService,
         DragonCaveQuestService,
+        KoyoQuestService,
         CasinoService,
         MarketService
     ]

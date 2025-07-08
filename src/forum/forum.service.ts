@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike, In } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { Topic } from './topic.entity';
 import { TopicReply } from './topic-reply.entity';
 import { User } from '../user/user.entity';
@@ -13,6 +13,8 @@ export class ForumService {
     private topicRepository: Repository<Topic>,
     @InjectRepository(TopicReply)
     private replyRepository: Repository<TopicReply>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async createTopic(createTopicDto: CreateTopicDto, user: User): Promise<Topic> {
@@ -33,7 +35,17 @@ export class ForumService {
   async getTopicById(id: number): Promise<Topic> {
     const topic = await this.topicRepository.findOne({
       where: { id },
-      relations: ['author', 'replies', 'replies.author'],
+      relations: [
+        'author',
+        'replies',
+        'replies.author',
+        'replies.parentReply',
+        'replies.parentReply.author',
+        'replies.children',
+        'replies.children.author',
+        'replies.children.parentReply',
+        'replies.children.parentReply.author',
+      ],
     });
     if (!topic) {
       throw new NotFoundException(`Topic #${id} not found`);
@@ -48,11 +60,24 @@ export class ForumService {
       throw new NotFoundException(`Topic #${topicId} not found`);
     }
 
-    const reply = this.replyRepository.create({
-      ...createReplyDto,
+    let parentReply: TopicReply | null = null;
+    if (createReplyDto.parentReplyId) {
+      parentReply = await this.replyRepository.findOne({ where: { id: createReplyDto.parentReplyId } });
+      if (!parentReply) {
+        throw new NotFoundException(`Reply #${createReplyDto.parentReplyId} not found`);
+      }
+    }
+
+    const replyData: Partial<TopicReply> = {
+      content: createReplyDto.content,
       author: user,
       topic,
-    });
+      parentReply: parentReply || undefined,
+      attachments: createReplyDto.attachments ?? undefined,
+    };
+
+    const reply = this.replyRepository.create(replyData);
+
     return this.replyRepository.save(reply);
   }
 
@@ -72,6 +97,46 @@ export class ForumService {
     }
     reply.likes += 1;
     return this.replyRepository.save(reply);
+  }
+
+  /**
+   * Supprime un topic (et ses réponses) si l’utilisateur est l’auteur ou possède le rôle admin.
+   */
+  async deleteTopic(topicId: number, requestingUserData: { id: number }): Promise<void> {
+    const requestingUser = await this.userRepository.findOne({ where: { id: requestingUserData.id } });
+    if (!requestingUser) {
+      throw new NotFoundException('User not found');
+    }
+    const topic = await this.topicRepository.findOne({ where: { id: topicId }, relations: ['author'] });
+    if (!topic) {
+      throw new NotFoundException(`Topic #${topicId} not found`);
+    }
+
+    if (topic.author.id !== requestingUser.id && requestingUser.role !== 'admin') {
+      throw new NotFoundException('Not allowed');
+    }
+
+    await this.topicRepository.delete(topicId);
+  }
+
+  /**
+   * Supprime une réponse (et ses enfants) si l’utilisateur est auteur ou admin
+   */
+  async deleteReply(replyId: number, requestingUserData: { id: number }): Promise<void> {
+    const requestingUser = await this.userRepository.findOne({ where: { id: requestingUserData.id } });
+    if (!requestingUser) {
+      throw new NotFoundException('User not found');
+    }
+    const reply = await this.replyRepository.findOne({ where: { id: replyId }, relations: ['author'] });
+    if (!reply) {
+      throw new NotFoundException(`Reply #${replyId} not found`);
+    }
+
+    if (reply.author.id !== requestingUser.id && requestingUser.role !== 'admin') {
+      throw new NotFoundException('Not allowed');
+    }
+
+    await this.replyRepository.delete(replyId);
   }
 
   async searchTopics(keyword: string): Promise<Topic[]> {
