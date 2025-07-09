@@ -45,6 +45,17 @@ export class DinoController {
         );
     }
 
+    // Classement des dinos
+    @Get('ranking')
+    @UseGuards(AuthGuard)
+    async getRanking(
+        @Query('category') category: string = 'xp',
+        @Query('limit') limit = '10',
+        @Query('order') order: 'asc' | 'desc' = 'desc'
+    ): Promise<Dino[]> {
+        return this.dinoService.getRanking(category, parseInt(limit), order);
+    }
+
     @Get('my/dinos')
     @UseGuards(AuthGuard)
     async findMyDinos(@Request() req): Promise<any[]> {

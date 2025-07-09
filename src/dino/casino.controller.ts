@@ -27,4 +27,9 @@ export class CasinoController {
     ) {
         return this.casinoService.playScratchTicket(dinoId, ticketKey);
     }
+
+    @Get(':dinoId/free-plays')
+    async getFreePlays(@Param('dinoId', ParseIntPipe) dinoId: number) {
+        return this.casinoService.getFreePlays(dinoId);
+    }
 } 

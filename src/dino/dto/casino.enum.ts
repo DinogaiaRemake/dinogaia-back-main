@@ -75,32 +75,32 @@ export const SCRATCH_TICKETS: { [key: string]: ScratchTicketConfig } = {
             { 
                 combination: ['étoile', 'étoile', 'pièce'],
                 emeralds: 1,
-                chance: 15 // 0.15 emeralds
+                chance: 25 // plus fréquent
             },
             { 
                 combination: ['pièce', 'diamant', 'pièce'],
                 emeralds: 5,
-                chance: 8 // 0.4 emeralds
+                chance: 15
             },
             { 
                 combination: ['diamant', 'coeur', 'diamant'],
                 emeralds: 10,
-                chance: 5 // 0.5 emeralds
+                chance: 10
             },
             {
                 combination: ['trèfle', 'trèfle', 'diamant'],
                 emeralds: 15,
-                chance: 3 // 0.45 emeralds
+                chance: 6
             },
             {
                 combination: ['coeur', 'étoile', 'coeur'],
                 emeralds: 250,
-                chance: 0.5 // 1.25 emeralds
+                chance: 1
             },
             {
                 combination: ['diamant', 'diamant', 'diamant'],
                 emeralds: 500,
-                chance: 0.1 // 0.5 emeralds
+                chance: 0.2
             }
         ]
     }

@@ -31,10 +31,11 @@ import { MarketListing } from './market-listing.entity';
 import { KoyoQuest } from './quest/koyo.entity';
 import { KoyoQuestService } from './quest/koyo.service';
 import { KoyoQuestController } from './quest/koyo.controller';
+import { CasinoDailyStat } from './casino-daily-stat.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Dino, User, Cave, Duel, SkyIslandsQuest, DragonCaveQuest, MarketListing, KoyoQuest]),
+        TypeOrmModule.forFeature([Dino, User, Cave, Duel, SkyIslandsQuest, DragonCaveQuest, MarketListing, KoyoQuest, CasinoDailyStat]),
         forwardRef(() => UserModule),
         forwardRef(() => DinoModule)
     ],

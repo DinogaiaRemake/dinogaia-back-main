@@ -1,5 +1,5 @@
 // TODO: Implement DinoService
-import { Injectable, NotFoundException, Inject, forwardRef, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, forwardRef, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Dino } from './dino.entity';
@@ -389,5 +389,55 @@ export class DinoService {
         }
 
         return DISEASE_CONFIG[dino.disease];
+    }
+
+    /**
+     * Récupère le classement des dinos selon une catégorie.
+     * @param category Catégorie de classement (age, height, weight, xp, emeralds)
+     * @param limit    Nombre de résultats à retourner
+     * @param order    Ordre de tri ('asc' | 'desc')
+     */
+    async getRanking(
+        category: string,
+        limit: number = 10,
+        order: 'asc' | 'desc' = 'desc'
+    ): Promise<Dino[]> {
+        // Normaliser l'entrée
+        const cat = category?.toLowerCase();
+
+        // Déterminer la colonne et le sens de tri
+        let orderObj: Record<string, 'ASC' | 'DESC'>;
+
+        switch (cat) {
+            case 'age':
+                // Pour l'âge, plus vieux d'abord => createdAt ASC
+                orderObj = { createdAt: order === 'desc' ? 'ASC' : 'DESC' };
+                break;
+            case 'taille':
+            case 'height':
+                orderObj = { height: order.toUpperCase() as 'ASC' | 'DESC' };
+                break;
+            case 'poids':
+            case 'weight':
+                orderObj = { weight: order.toUpperCase() as 'ASC' | 'DESC' };
+                break;
+            case 'xp':
+            case 'experience':
+                orderObj = { experience: order.toUpperCase() as 'ASC' | 'DESC' };
+                break;
+            case 'richesse':
+            case 'emeralds':
+            case 'wealth':
+                orderObj = { emeralds: order.toUpperCase() as 'ASC' | 'DESC' };
+                break;
+            default:
+                throw new BadRequestException('Catégorie de classement invalide');
+        }
+
+        return this.dinoRepository.find({
+            order: orderObj,
+            take: limit,
+            relations: ['user']
+        });
     }
 }

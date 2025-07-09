@@ -1,15 +1,37 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { DinoService } from './dino.service';
 import { CaveService } from './cave.service';
 import { SLOT_MACHINES, SCRATCH_TICKETS, SlotMachineConfig, ScratchTicketConfig } from './dto/casino.enum';
 import { ITEMS_CONFIG } from './dto/item.enum';
+import { CasinoDailyStat } from './casino-daily-stat.entity';
 
 @Injectable()
 export class CasinoService {
     constructor(
         private dinoService: DinoService,
-        private caveService: CaveService
+        private caveService: CaveService,
+        @InjectRepository(CasinoDailyStat)
+        private statsRepository: Repository<CasinoDailyStat>
     ) {}
+
+    /*------------------------------------
+     *  Utilitaires parties gratuites
+     *-----------------------------------*/
+    private getTodayDateString(): string {
+        return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    }
+
+    private async getTodayStats(dinoId: number): Promise<CasinoDailyStat> {
+        const date = this.getTodayDateString();
+        let stats = await this.statsRepository.findOne({ where: { dinoId, date } });
+        if (!stats) {
+            stats = this.statsRepository.create({ dinoId, date });
+            await this.statsRepository.save(stats);
+        }
+        return stats;
+    }
 
     async playSlotMachine(dinoId: number, machineKey: string): Promise<{
         message: string;
@@ -26,13 +48,22 @@ export class CasinoService {
             throw new NotFoundException('Machine à sous non trouvée');
         }
 
-        if (dino.emeralds < machine.cost) {
+        // Gestion des parties gratuites
+        const stats = await this.getTodayStats(dinoId);
+        const freePlaysRemaining = 3 - stats.slotPlaysUsed;
+
+        if (freePlaysRemaining <= 0 && dino.emeralds < machine.cost) {
             throw new BadRequestException('Pas assez d\'émeraudes');
         }
 
-        // Déduire le coût
-        dino.emeralds -= machine.cost;
-        await this.dinoService.update(dinoId, dino);
+        if (freePlaysRemaining <= 0) {
+            dino.emeralds -= machine.cost;
+            await this.dinoService.update(dinoId, dino);
+        }
+
+        // Incrémenter le compteur quelles que soient les parties
+        stats.slotPlaysUsed += 1;
+        await this.statsRepository.save(stats);
 
 
         // Calculer la somme totale des chances
@@ -118,13 +149,20 @@ export class CasinoService {
             throw new NotFoundException('Ticket non trouvé');
         }
 
-        if (dino.emeralds < ticket.cost) {
+        const stats2 = await this.getTodayStats(dinoId);
+        const freeScratchesRemaining = 3 - stats2.scratchPlaysUsed;
+
+        if (freeScratchesRemaining <= 0 && dino.emeralds < ticket.cost) {
             throw new BadRequestException('Pas assez d\'émeraudes');
         }
 
-        // Déduire le coût
-        dino.emeralds -= ticket.cost;
-        await this.dinoService.update(dinoId, dino);
+        if (freeScratchesRemaining <= 0) {
+            dino.emeralds -= ticket.cost;
+            await this.dinoService.update(dinoId, dino);
+        }
+
+        stats2.scratchPlaysUsed += 1;
+        await this.statsRepository.save(stats2);
 
         // Déterminer le prix gagné et la combinaison
         const result = this.selectPrizeAndCombination(ticket);
@@ -224,6 +262,14 @@ export class CasinoService {
         return {
             slotMachines: SLOT_MACHINES,
             scratchTickets: SCRATCH_TICKETS
+        };
+    }
+
+    async getFreePlays(dinoId: number) {
+        const stats = await this.getTodayStats(dinoId);
+        return {
+            slotFree: Math.max(0, 3 - stats.slotPlaysUsed),
+            scratchFree: Math.max(0, 3 - stats.scratchPlaysUsed)
         };
     }
 } 
